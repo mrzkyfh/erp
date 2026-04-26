@@ -1,39 +1,46 @@
-import cors from "cors";
-import express from "express";
-import { env } from "./config/env.js";
-import { errorHandler, notFoundHandler } from "./middleware/error-handler.js";
+import { Hono } from "hono";
+import { cors } from "hono/cors";
+import { env, getEnv } from "./config/env.js";
 import { router } from "./routes/index.js";
 
 export function createApp() {
-  const app = express();
+  const app = new Hono();
 
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        const allowedOrigins = env.FRONTEND_URL.split(",");
+  app.use("*", async (c, next) => {
+    const currentEnv = getEnv(c.env);
+    const allowedOrigins = currentEnv.FRONTEND_URL.split(",");
+    
+    const corsMiddleware = cors({
+      origin: (origin) => {
         if (!origin || allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error("Not allowed by CORS"));
+          return origin;
         }
+        return null;
       },
       credentials: true,
-    }),
-  );
-  app.use(express.json({ limit: "10mb" }));
+    });
+    
+    return corsMiddleware(c, next);
+  });
 
-  app.get("/health", (_request, response) => {
-    response.json({
+  app.get("/health", (c) => {
+    return c.json({
       ok: true,
-      message: "ERP Mini backend siap digunakan.",
+      message: "ERP Mini backend siap digunakan (Hono).",
       timezone: env.APP_TIMEZONE,
     });
   });
 
-  app.use("/api", router);
-  app.use(notFoundHandler);
-  app.use(errorHandler);
+  // API Routes
+  app.route("/api", router);
+
+  app.notFound((c) => c.json({ message: "Endpoint tidak ditemukan" }, 404));
+  app.onError((err, c) => {
+    console.error(err);
+    return c.json({ message: err.message || "Internal Server Error" }, 500);
+  });
 
   return app;
 }
+
 

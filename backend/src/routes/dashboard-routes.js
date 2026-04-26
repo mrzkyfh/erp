@@ -1,10 +1,10 @@
-import { Router } from "express";
+import { Hono } from "hono";
 import { dashboardSummary } from "../controllers/dashboard-controller.js";
-import { asyncHandler } from "../utils/async-handler.js";
 
-const router = Router();
+const router = new Hono();
 
-router.get("/summary", asyncHandler(dashboardSummary));
+router.get("/summary", dashboardSummary);
 
 export { router as dashboardRoutes };
+
 

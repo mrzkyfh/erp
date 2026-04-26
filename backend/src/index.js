@@ -1,10 +1,20 @@
+import { serve } from "@hono/node-server";
 import { env } from "./config/env.js";
 import { createApp } from "./app.js";
 
 const app = createApp();
 
-app.listen(env.PORT, () => {
-  // eslint-disable-next-line no-console
-  console.log(`Backend berjalan di http://localhost:${env.PORT}`);
-});
+// Untuk Cloudflare Workers
+export default app;
+
+// Untuk Local Node.js
+if (process.env.NODE_ENV !== "production") {
+  serve({
+    fetch: app.fetch,
+    port: env.PORT,
+  }, (info) => {
+    console.log(`Backend berjalan di http://localhost:${info.port}`);
+  });
+}
+
 

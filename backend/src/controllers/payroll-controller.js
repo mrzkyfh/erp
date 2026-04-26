@@ -1,25 +1,34 @@
 import { getPayrollOverview, markPayrollPaid, processPayroll } from "../services/payroll-service.js";
 
-export async function payrollPeriods(request, response) {
+export async function payrollPeriods(c) {
+  const month = c.req.query("month");
+  const year = c.req.query("year");
+  
   const data = await getPayrollOverview(
-    request.profile,
-    request.query.month ? Number(request.query.month) : undefined,
-    request.query.year ? Number(request.query.year) : undefined,
+    c.get("profile"),
+    month ? Number(month) : undefined,
+    year ? Number(year) : undefined,
   );
-  response.json({ data });
+  return c.json({ data });
 }
 
-export async function runPayroll(request, response) {
+export async function runPayroll(c) {
+  const validatedBody = c.get("validatedBody");
+  const profile = c.get("profile");
+  
   const data = await processPayroll(
-    request.validatedBody.month,
-    request.validatedBody.year,
-    request.profile.id,
+    validatedBody.month,
+    validatedBody.year,
+    profile.id,
   );
-  response.json({ data });
+  return c.json({ data });
 }
 
-export async function payPayroll(request, response) {
-  const data = await markPayrollPaid(request.params.id, request.profile.id);
-  response.json({ data });
+export async function payPayroll(c) {
+  const id = c.req.param("id");
+  const profile = c.get("profile");
+  const data = await markPayrollPaid(id, profile.id);
+  return c.json({ data });
 }
+
 

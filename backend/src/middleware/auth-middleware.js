@@ -1,12 +1,11 @@
 import { supabaseAdmin } from "../services/supabase.js";
-import { AppError } from "../utils/app-error.js";
 
-export async function authenticate(request, _response, next) {
-  const authHeader = request.headers.authorization;
+export async function authenticate(c, next) {
+  const authHeader = c.req.header("Authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
 
   if (!token) {
-    return next(new AppError("Token autentikasi tidak ditemukan.", 401));
+    return c.json({ message: "Token autentikasi tidak ditemukan." }, 401);
   }
 
   const {
@@ -15,7 +14,7 @@ export async function authenticate(request, _response, next) {
   } = await supabaseAdmin.auth.getUser(token);
 
   if (error || !user) {
-    return next(new AppError("Sesi login tidak valid.", 401));
+    return c.json({ message: "Sesi login tidak valid." }, 401);
   }
 
   const { data: profile, error: profileError } = await supabaseAdmin
@@ -25,21 +24,23 @@ export async function authenticate(request, _response, next) {
     .single();
 
   if (profileError || !profile) {
-    return next(new AppError("Profil pengguna tidak ditemukan.", 404));
+    return c.json({ message: "Profil pengguna tidak ditemukan." }, 404);
   }
 
-  request.user = user;
-  request.profile = profile;
+  c.set("user", user);
+  c.set("profile", profile);
   return next();
 }
 
 export function requireRoles(...allowedRoles) {
-  return (request, _response, next) => {
-    if (!allowedRoles.includes(request.profile?.role)) {
-      return next(new AppError("Anda tidak memiliki akses ke fitur ini.", 403));
+  return async (c, next) => {
+    const profile = c.get("profile");
+    if (!allowedRoles.includes(profile?.role)) {
+      return c.json({ message: "Anda tidak memiliki akses ke fitur ini." }, 403);
     }
 
     return next();
   };
 }
+
 

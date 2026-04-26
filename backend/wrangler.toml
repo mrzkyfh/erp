@@ -1,0 +1,13 @@
+name = "erp-mini-backend"
+main = "src/index.js"
+compatibility_date = "2026-04-27"
+compatibility_flags = [ "nodejs_compat" ]
+
+[vars]
+# Variabel environment untuk production akan diatur via dashboard Cloudflare atau 'wrangler secret'
+SUPABASE_URL = ""
+SUPABASE_ANON_KEY = ""
+SUPABASE_SERVICE_ROLE_KEY = ""
+FRONTEND_URL = ""
+APP_TIMEZONE = "Asia/Jakarta"
+

@@ -1,13 +1,12 @@
-import { Router } from "express";
+import { Hono } from "hono";
 import { z } from "zod";
 import { payPayroll, payrollPeriods, runPayroll } from "../controllers/payroll-controller.js";
-import { asyncHandler } from "../utils/async-handler.js";
 import { validateBody } from "../middleware/validate-body.js";
 import { requireRoles } from "../middleware/auth-middleware.js";
 
-const router = Router();
+const router = new Hono();
 
-router.get("/periods", asyncHandler(payrollPeriods));
+router.get("/periods", payrollPeriods);
 router.post(
   "/process",
   requireRoles("owner", "manager"),
@@ -17,9 +16,10 @@ router.post(
       year: z.number().min(2024).max(2100),
     }),
   ),
-  asyncHandler(runPayroll),
+  runPayroll,
 );
-router.post("/details/:id/pay", requireRoles("owner"), asyncHandler(payPayroll));
+router.post("/details/:id/pay", requireRoles("owner"), payPayroll);
 
 export { router as payrollRoutes };
+
 

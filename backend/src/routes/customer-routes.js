@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Hono } from "hono";
 import { z } from "zod";
 import {
   customers,
@@ -6,10 +6,9 @@ import {
   removeCustomer,
   storeCustomer,
 } from "../controllers/customer-controller.js";
-import { asyncHandler } from "../utils/async-handler.js";
 import { validateBody } from "../middleware/validate-body.js";
 
-const router = Router();
+const router = new Hono();
 
 const schema = z.object({
   name: z.string().min(2, "Nama konsumen wajib diisi."),
@@ -19,10 +18,11 @@ const schema = z.object({
   notes: z.string().optional().nullable(),
 });
 
-router.get("/", asyncHandler(customers));
-router.post("/", validateBody(schema), asyncHandler(storeCustomer));
-router.put("/:id", validateBody(schema), asyncHandler(editCustomer));
-router.delete("/:id", asyncHandler(removeCustomer));
+router.get("/", customers);
+router.post("/", validateBody(schema), storeCustomer);
+router.put("/:id", validateBody(schema), editCustomer);
+router.delete("/:id", removeCustomer);
 
 export { router as customerRoutes };
+
 

@@ -1,24 +1,27 @@
-import { AppError } from "../utils/app-error.js";
 import { supabaseAdmin } from "../services/supabase.js";
 
-export async function getMe(request, response) {
-  response.json({
+export async function getMe(c) {
+  return c.json({
     data: {
-      user: request.user,
-      profile: request.profile,
+      user: c.get("user"),
+      profile: c.get("profile"),
     },
   });
 }
 
-export async function updateMyProfile(request, response) {
+export async function updateMyProfile(c) {
+  const profile = c.get("profile");
   const { data, error } = await supabaseAdmin
     .from("profiles")
-    .update(request.validatedBody)
-    .eq("id", request.profile.id)
+    .update(c.get("validatedBody"))
+    .eq("id", profile.id)
     .select("*")
     .single();
 
-  if (error) throw new AppError(error.message, 500);
-  response.json({ data });
+  if (error) {
+    return c.json({ message: error.message }, 500);
+  }
+  return c.json({ data });
 }
+
 

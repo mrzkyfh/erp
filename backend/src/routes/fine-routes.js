@@ -1,12 +1,11 @@
-import { Router } from "express";
+import { Hono } from "hono";
 import { z } from "zod";
 import { fineTypes, fines, storeFine, storeFineType } from "../controllers/fine-controller.js";
-import { asyncHandler } from "../utils/async-handler.js";
 import { validateBody } from "../middleware/validate-body.js";
 
-const router = Router();
+const router = new Hono();
 
-router.get("/types", asyncHandler(fineTypes));
+router.get("/types", fineTypes);
 router.post(
   "/types",
   validateBody(
@@ -17,9 +16,9 @@ router.post(
       trigger_type: z.string().min(2),
     }),
   ),
-  asyncHandler(storeFineType),
+  storeFineType,
 );
-router.get("/", asyncHandler(fines));
+router.get("/", fines);
 router.post(
   "/",
   validateBody(
@@ -31,8 +30,9 @@ router.post(
       date: z.string().optional().nullable(),
     }),
   ),
-  asyncHandler(storeFine),
+  storeFine,
 );
 
 export { router as fineRoutes };
+
 

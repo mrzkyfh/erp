@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Hono } from "hono";
 import { z } from "zod";
 import {
   editEmployee,
@@ -7,10 +7,9 @@ import {
   patchEmployeeStatus,
   storeEmployee,
 } from "../controllers/employee-controller.js";
-import { asyncHandler } from "../utils/async-handler.js";
 import { validateBody } from "../middleware/validate-body.js";
 
-const router = Router();
+const router = new Hono();
 
 const employeeSchema = z.object({
   email: z.string().email("Email tidak valid."),
@@ -29,15 +28,16 @@ const employeeSchema = z.object({
   jobdesk_ids: z.array(z.string().uuid()).optional(),
 });
 
-router.get("/", asyncHandler(getEmployees));
-router.get("/jobdesks", asyncHandler(getJobdesks));
-router.post("/", validateBody(employeeSchema), asyncHandler(storeEmployee));
-router.put("/:id", validateBody(employeeSchema), asyncHandler(editEmployee));
+router.get("/", getEmployees);
+router.get("/jobdesks", getJobdesks);
+router.post("/", validateBody(employeeSchema), storeEmployee);
+router.put("/:id", validateBody(employeeSchema), editEmployee);
 router.patch(
   "/:id/status",
   validateBody(z.object({ status: z.enum(["aktif", "nonaktif"]) })),
-  asyncHandler(patchEmployeeStatus),
+  patchEmployeeStatus,
 );
 
 export { router as employeeRoutes };
+
 

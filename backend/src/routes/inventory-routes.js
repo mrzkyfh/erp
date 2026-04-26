@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Hono } from "hono";
 import { z } from "zod";
 import {
   inventoryOverview,
@@ -7,12 +7,11 @@ import {
   storeSupplier,
   storeUsage,
 } from "../controllers/inventory-controller.js";
-import { asyncHandler } from "../utils/async-handler.js";
 import { validateBody } from "../middleware/validate-body.js";
 
-const router = Router();
+const router = new Hono();
 
-router.get("/overview", asyncHandler(inventoryOverview));
+router.get("/overview", inventoryOverview);
 router.post(
   "/items",
   validateBody(
@@ -25,7 +24,7 @@ router.post(
       photo_url: z.string().optional().nullable(),
     }),
   ),
-  asyncHandler(storeInventoryItem),
+  storeInventoryItem,
 );
 router.post(
   "/suppliers",
@@ -37,7 +36,7 @@ router.post(
       address: z.string().optional().nullable(),
     }),
   ),
-  asyncHandler(storeSupplier),
+  storeSupplier,
 );
 router.post(
   "/purchases",
@@ -50,7 +49,7 @@ router.post(
       date: z.string().min(1, "Tanggal pembelian wajib diisi."),
     }),
   ),
-  asyncHandler(storePurchase),
+  storePurchase,
 );
 router.post(
   "/usages",
@@ -62,8 +61,9 @@ router.post(
       date: z.string().min(1, "Tanggal penggunaan wajib diisi."),
     }),
   ),
-  asyncHandler(storeUsage),
+  storeUsage,
 );
 
 export { router as inventoryRoutes };
+
 

@@ -70,8 +70,13 @@ export function InventoryPage() {
                 </select>
               </FormField>
               <FormField label="Satuan">
-                <Input value={itemForm.unit} onChange={(e) => setItemForm((prev) => ({ ...prev, unit: e.target.value }))} />
+                <Input
+                  value={itemForm.unit}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => setItemForm((prev) => ({ ...prev, unit: e.target.value }))}
+                />
               </FormField>
+
               <FormField label="Stok awal">
                 <Input
                   type="number"
