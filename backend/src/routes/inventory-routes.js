@@ -8,16 +8,21 @@ import {
   storeUsage,
 } from "../controllers/inventory-controller.js";
 import { validateBody } from "../middleware/validate-body.js";
+import { requireRoles } from "../middleware/auth-middleware.js";
 
 const router = new Hono();
 
+// Karyawan bisa lihat overview
 router.get("/overview", inventoryOverview);
+
+// Hanya owner/manager bisa create item, supplier, purchase
 router.post(
   "/items",
+  requireRoles("owner", "manager"),
   validateBody(
     z.object({
       name: z.string().min(2, "Nama item wajib diisi."),
-      category_id: z.string().uuid(),
+      category_id: z.string().uuid().nullable().optional(),
       unit: z.string().min(1),
       current_stock: z.number().nonnegative(),
       min_stock: z.number().nonnegative(),
@@ -28,6 +33,7 @@ router.post(
 );
 router.post(
   "/suppliers",
+  requireRoles("owner", "manager"),
   validateBody(
     z.object({
       name: z.string().min(2, "Nama supplier wajib diisi."),
@@ -40,6 +46,7 @@ router.post(
 );
 router.post(
   "/purchases",
+  requireRoles("owner", "manager"),
   validateBody(
     z.object({
       supplier_id: z.string().uuid(),
@@ -51,6 +58,8 @@ router.post(
   ),
   storePurchase,
 );
+
+// Semua role (owner, manager, karyawan) bisa record usage
 router.post(
   "/usages",
   validateBody(

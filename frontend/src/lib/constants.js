@@ -60,7 +60,7 @@ export const navigation = [
     label: "Inventori",
     path: "/inventori",
     icon: Boxes,
-    roles: ["owner", "manager"],
+    roles: ["owner", "manager", "karyawan"],
   },
 ];
 
