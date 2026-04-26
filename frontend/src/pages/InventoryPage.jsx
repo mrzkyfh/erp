@@ -9,7 +9,7 @@ import { FormField } from "@/components/forms/FormField";
 import { api } from "@/lib/api";
 import { formatDateID, formatRupiah } from "@/lib/utils";
 
-const itemDefaults = { name: "", category_id: "", unit: "pcs", current_stock: "", min_stock: "" };
+const itemDefaults = { name: "", unit: "pcs", current_stock: "", min_stock: "" };
 const supplierDefaults = { name: "", contact_phone: "", email: "", address: "" };
 const purchaseDefaults = { supplier_id: "", item_id: "", qty: "", unit_price: "", date: "" };
 const usageDefaults = { item_id: "", qty: "", reason: "", date: "" };
@@ -55,20 +55,6 @@ export function InventoryPage() {
               <FormField label="Nama item">
                 <Input value={itemForm.name} onChange={(e) => setItemForm((prev) => ({ ...prev, name: e.target.value }))} />
               </FormField>
-              <FormField label="Kategori">
-                <select
-                  className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm"
-                  value={itemForm.category_id}
-                  onChange={(e) => setItemForm((prev) => ({ ...prev, category_id: e.target.value }))}
-                >
-                  <option value="">Pilih kategori</option>
-                  {overview.categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </FormField>
               <FormField label="Satuan">
                 <Input
                   value={itemForm.unit}
@@ -97,12 +83,13 @@ export function InventoryPage() {
             <Button
               onClick={async () => {
                 try {
-                  if (!itemForm.name || !itemForm.category_id) {
-                    toast.error("Nama dan kategori item wajib diisi.");
+                  if (!itemForm.name) {
+                    toast.error("Nama item wajib diisi.");
                     return;
                   }
                   await api.post("/inventory/items", {
                     ...itemForm,
+                    category_id: null,
                     current_stock: Number(itemForm.current_stock || 0),
                     min_stock: Number(itemForm.min_stock || 0),
                   });
@@ -333,7 +320,6 @@ export function InventoryPage() {
               <THead>
                 <TR>
                   <TH>Item</TH>
-                  <TH>Kategori</TH>
                   <TH>Stok</TH>
                   <TH>Status</TH>
                 </TR>
@@ -342,7 +328,6 @@ export function InventoryPage() {
                 {overview.items.map((item) => (
                   <TR key={item.id}>
                     <TD>{item.name}</TD>
-                    <TD>{item.category?.name}</TD>
                     <TD>
                       {item.current_stock} {item.unit}
                     </TD>
