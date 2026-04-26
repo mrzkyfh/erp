@@ -41,6 +41,25 @@ body {
   select,
   textarea {
     @apply outline-none;
+    /* Ensure touch targets are at least 44x44px */
+    min-height: 44px;
+  }
+
+  /* Mobile-first font sizes */
+  body {
+    @apply text-sm md:text-base;
+  }
+
+  h1 {
+    @apply text-2xl md:text-4xl;
+  }
+
+  h2 {
+    @apply text-xl md:text-3xl;
+  }
+
+  h3 {
+    @apply text-lg md:text-2xl;
   }
 }
 
@@ -58,6 +77,13 @@ body {
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  /* Mobile-safe area padding */
+  .safe-area-inset {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 }
 
