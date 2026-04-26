@@ -61,9 +61,6 @@ export function DashboardPage() {
             <h3 className="mt-4 text-3xl font-bold">
               Selamat datang, {profile?.full_name?.split(" ")[0] || "Pengguna"}.
             </h3>
-            <p className="mt-3 max-w-2xl text-sm text-slate-200">
-              Ringkasan ini membantu Anda memonitor operasional bisnis harian, dari kehadiran tim sampai stok kritis.
-            </p>
           </div>
           <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
             <p className="text-sm text-slate-300">Ringkasan cepat</p>

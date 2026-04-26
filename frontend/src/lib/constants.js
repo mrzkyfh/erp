@@ -17,15 +17,26 @@ export const navigation = [
   },
   {
     label: "Karyawan",
-    path: "/karyawan",
     icon: Users,
     roles: ["owner", "manager"],
+    children: [
+      {
+        label: "Data Karyawan",
+        path: "/karyawan",
+        roles: ["owner", "manager"],
+      },
+      {
+        label: "Absensi",
+        path: "/absensi",
+        roles: ["owner", "manager"],
+      },
+    ],
   },
   {
     label: "Absensi",
     path: "/absensi",
     icon: ShieldCheck,
-    roles: ["owner", "manager", "karyawan"],
+    roles: ["karyawan"],
   },
   {
     label: "Denda",
