@@ -1,0 +1,14 @@
+export function notFoundHandler(_request, response) {
+  response.status(404).json({
+    message: "Endpoint tidak ditemukan.",
+  });
+}
+
+export function errorHandler(error, _request, response, _next) {
+  const statusCode = error.statusCode || 500;
+
+  response.status(statusCode).json({
+    message: error.message || "Terjadi kesalahan pada server.",
+  });
+}
+
