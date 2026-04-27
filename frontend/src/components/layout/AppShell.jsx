@@ -1,4 +1,4 @@
-import { ChevronDown, LogOut, Menu } from "lucide-react";
+import { ChevronDown, LogOut, Menu, User } from "lucide-react";
 import { useMemo, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { navigation } from "@/lib/constants";
@@ -37,20 +37,23 @@ export function AppShell({ children }) {
     return "Dashboard";
   }, [menus, location.pathname]);
 
-  // Get top-level menu items for bottom nav (only non-group items or group labels)
+  // Get top-level menu items for bottom nav
   const bottomNavItems = useMemo(() => {
-    return menus.filter((item) => !item.children || item.children.length === 0);
+    return menus.slice(0, 4).filter((item) => !item.children || item.children.length === 0);
   }, [menus]);
 
   return (
-    <div className="min-h-screen pb-24 md:pb-0">
+    <div className="min-h-screen bg-slate-50 pb-20 md:pb-0">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:fixed md:inset-y-3 md:left-3 md:z-20 md:flex md:w-[280px] md:flex-col md:rounded-[28px] md:border md:border-white/50 md:bg-white/85 md:p-4 md:backdrop-blur-[18px]">
-        <div className="mb-6 rounded-3xl bg-mesh p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">ERP Mini</p>
+      <aside className="hidden md:fixed md:inset-y-4 md:left-4 md:z-20 md:flex md:w-[280px] md:flex-col md:rounded-xl md:border md:border-slate-200 md:bg-white md:shadow-lg">
+        {/* Logo */}
+        <div className="m-4 mb-6 rounded-lg bg-gradient-to-br from-slate-600 to-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">ERP Mini</p>
+          <p className="text-[10px] text-slate-300 mt-0.5">UMKM Management</p>
         </div>
 
-        <nav className="space-y-1 flex-1">
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1 px-3 overflow-y-auto">
           {menus.map((item) => {
             const Icon = item.icon;
 
@@ -64,10 +67,10 @@ export function AppShell({ children }) {
                   <button
                     onClick={() => toggleGroup(item.label)}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
+                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                       hasActiveChild
-                        ? "bg-primary/10 text-primary"
-                        : "text-foreground hover:bg-muted",
+                        ? "bg-slate-100 text-slate-900"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
@@ -80,7 +83,7 @@ export function AppShell({ children }) {
                     />
                   </button>
                   {isOpen && (
-                    <div className="ml-4 mt-1 space-y-1 border-l-2 border-primary/20 pl-3">
+                    <div className="ml-7 mt-1 space-y-0.5 border-l-2 border-slate-200 pl-3">
                       {item.children
                         .filter((child) => child.roles.includes(profile?.role))
                         .map((child) => (
@@ -89,10 +92,10 @@ export function AppShell({ children }) {
                             to={child.path}
                             className={({ isActive }) =>
                               cn(
-                                "block rounded-xl px-3 py-2 text-sm font-medium transition",
+                                "block rounded-md px-3 py-2 text-sm font-medium transition-colors",
                                 isActive
-                                  ? "bg-primary text-primary-foreground shadow-soft"
-                                  : "text-foreground hover:bg-muted",
+                                  ? "bg-primary text-primary-foreground shadow-sm"
+                                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                               )
                             }
                           >
@@ -112,10 +115,10 @@ export function AppShell({ children }) {
                 to={item.path}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-soft"
-                      : "text-foreground hover:bg-muted",
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                   )
                 }
               >
@@ -126,17 +129,18 @@ export function AppShell({ children }) {
           })}
         </nav>
 
-        <div className="rounded-3xl bg-muted p-4">
+        {/* User Profile */}
+        <div className="m-3 mt-auto rounded-lg border border-slate-200 bg-slate-50 p-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-sm font-semibold text-primary-foreground">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
               {getInitials(profile?.full_name)}
             </div>
-            <div className="min-w-0">
-              <p className="font-medium truncate">{profile?.full_name}</p>
-              <p className="text-sm text-muted-foreground">{getRoleLabel(profile?.role)}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-slate-900 truncate">{profile?.full_name}</p>
+              <p className="text-xs text-slate-500">{getRoleLabel(profile?.role)}</p>
             </div>
           </div>
-          <Button variant="ghost" className="mt-4 w-full justify-start" onClick={logout}>
+          <Button variant="ghost" size="sm" className="mt-3 w-full justify-start text-slate-600" onClick={logout}>
             <LogOut className="h-4 w-4" />
             Keluar
           </Button>
@@ -147,7 +151,7 @@ export function AppShell({ children }) {
       {sidebarOpen && (
         <button
           aria-label="Tutup menu"
-          className="fixed inset-0 z-10 bg-slate-900/30 md:hidden"
+          className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -155,15 +159,18 @@ export function AppShell({ children }) {
       {/* Mobile Sidebar */}
       <aside
         className={cn(
-          "glass fixed inset-y-0 left-0 z-20 flex w-[280px] flex-col rounded-r-[28px] border-r border-white/50 p-4 transition-transform md:hidden",
+          "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col bg-white shadow-2xl transition-transform duration-300 md:hidden",
           sidebarOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="mb-6 rounded-3xl bg-mesh p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-primary">ERP Mini</p>
+        {/* Logo */}
+        <div className="m-4 mb-6 rounded-lg bg-gradient-to-br from-slate-600 to-slate-800 p-4 shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">ERP Mini</p>
+          <p className="text-[10px] text-slate-300 mt-0.5">UMKM Management</p>
         </div>
 
-        <nav className="space-y-1 flex-1 overflow-y-auto">
+        {/* Navigation */}
+        <nav className="flex-1 space-y-1 px-3 overflow-y-auto">
           {menus.map((item) => {
             const Icon = item.icon;
 
@@ -176,10 +183,10 @@ export function AppShell({ children }) {
                   <button
                     onClick={() => toggleGroup(item.label)}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
+                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                       hasActiveChild
-                        ? "bg-primary/10 text-primary"
-                        : "text-foreground hover:bg-muted",
+                        ? "bg-slate-100 text-slate-900"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
@@ -192,7 +199,7 @@ export function AppShell({ children }) {
                     />
                   </button>
                   {isOpen && (
-                    <div className="ml-4 mt-1 space-y-1 border-l-2 border-primary/20 pl-3">
+                    <div className="ml-7 mt-1 space-y-0.5 border-l-2 border-slate-200 pl-3">
                       {item.children
                         .filter((child) => child.roles.includes(profile?.role))
                         .map((child) => (
@@ -202,10 +209,10 @@ export function AppShell({ children }) {
                             onClick={() => setSidebarOpen(false)}
                             className={({ isActive }) =>
                               cn(
-                                "block rounded-xl px-3 py-2 text-sm font-medium transition",
+                                "block rounded-md px-3 py-2 text-sm font-medium transition-colors",
                                 isActive
-                                  ? "bg-primary text-primary-foreground shadow-soft"
-                                  : "text-foreground hover:bg-muted",
+                                  ? "bg-primary text-primary-foreground shadow-sm"
+                                  : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                               )
                             }
                           >
@@ -225,10 +232,10 @@ export function AppShell({ children }) {
                 onClick={() => setSidebarOpen(false)}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-soft"
-                      : "text-foreground hover:bg-muted",
+                      ? "bg-primary text-primary-foreground shadow-sm"
+                      : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
                   )
                 }
               >
@@ -239,17 +246,18 @@ export function AppShell({ children }) {
           })}
         </nav>
 
-        <div className="rounded-3xl bg-muted p-4">
+        {/* User Profile */}
+        <div className="m-3 mt-auto rounded-lg border border-slate-200 bg-slate-50 p-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-sm font-semibold text-primary-foreground">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
               {getInitials(profile?.full_name)}
             </div>
-            <div className="min-w-0">
-              <p className="font-medium truncate">{profile?.full_name}</p>
-              <p className="text-sm text-muted-foreground">{getRoleLabel(profile?.role)}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-slate-900 truncate">{profile?.full_name}</p>
+              <p className="text-xs text-slate-500">{getRoleLabel(profile?.role)}</p>
             </div>
           </div>
-          <Button variant="ghost" className="mt-4 w-full justify-start" onClick={logout}>
+          <Button variant="ghost" size="sm" className="mt-3 w-full justify-start text-slate-600" onClick={logout}>
             <LogOut className="h-4 w-4" />
             Keluar
           </Button>
@@ -257,41 +265,42 @@ export function AppShell({ children }) {
       </aside>
 
       {/* Main Content */}
-      <main className="md:ml-[300px]">
+      <main className="md:ml-[300px] md:mr-4">
         {/* Header */}
-        <div className="sticky top-0 z-10 glass border-b border-white/60 p-3 md:rounded-t-[28px] md:border-0 md:p-6">
+        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur-sm px-4 py-3 md:mt-4 md:rounded-t-xl md:border-x md:border-t md:px-6 md:py-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="text-xs text-muted-foreground md:text-sm">Sistem manajemen bisnis</p>
-              <h2 className="text-lg font-bold md:text-2xl">{activeLabel}</h2>
+              <p className="text-xs text-slate-500 md:text-sm">Sistem Manajemen Bisnis</p>
+              <h2 className="text-lg font-bold text-slate-900 md:text-xl">{activeLabel}</h2>
             </div>
             <div className="flex items-center gap-2">
               <NavLink
                 to="/profil"
-                className="hidden rounded-2xl border border-border px-3 py-2 text-sm font-medium hover:bg-muted md:block"
+                className="hidden items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 md:flex"
               >
+                <User className="h-4 w-4" />
                 Profil
               </NavLink>
               <Button
                 variant="outline"
-                size="sm"
+                size="icon"
                 className="md:hidden"
                 onClick={() => setSidebarOpen(true)}
               >
-                <Menu className="h-4 w-4" />
+                <Menu className="h-5 w-5" />
               </Button>
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="page-enter space-y-4 p-3 md:rounded-b-[28px] md:p-6">
+        <div className="page-enter space-y-4 p-4 md:rounded-b-xl md:border-x md:border-b md:border-slate-200 md:bg-white md:p-6 md:shadow-sm min-h-[calc(100vh-80px)]">
           {children}
         </div>
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-20 flex gap-1 border-t border-white/60 bg-white/85 p-2 backdrop-blur-[18px] md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-20 flex items-center gap-1 border-t border-slate-200 bg-white px-2 py-2 shadow-lg md:hidden">
         {bottomNavItems.map((item) => {
           const Icon = item.icon;
           const isActive = item.path === location.pathname;
@@ -301,10 +310,10 @@ export function AppShell({ children }) {
               key={item.path}
               to={item.path}
               className={cn(
-                "flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl py-2 text-xs font-medium transition",
+                "flex flex-1 flex-col items-center justify-center gap-1 rounded-lg py-2 text-[10px] font-medium transition-colors min-h-[60px]",
                 isActive
                   ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-muted",
+                  : "text-slate-500 active:bg-slate-100",
               )}
             >
               <Icon className="h-5 w-5" />
@@ -315,13 +324,16 @@ export function AppShell({ children }) {
         <NavLink
           to="/profil"
           className={cn(
-            "flex flex-1 flex-col items-center justify-center gap-1 rounded-2xl py-2 text-xs font-medium transition",
+            "flex flex-1 flex-col items-center justify-center gap-1 rounded-lg py-2 text-[10px] font-medium transition-colors min-h-[60px]",
             location.pathname === "/profil"
               ? "bg-primary text-primary-foreground"
-              : "text-muted-foreground hover:bg-muted",
+              : "text-slate-500 active:bg-slate-100",
           )}
         >
-          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/20 text-xs font-bold">
+          <div className={cn(
+            "flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold",
+            location.pathname === "/profil" ? "bg-white/20" : "bg-slate-200"
+          )}>
             {getInitials(profile?.full_name)?.[0]}
           </div>
           <span className="line-clamp-1">Profil</span>
@@ -330,4 +342,3 @@ export function AppShell({ children }) {
     </div>
   );
 }
-
