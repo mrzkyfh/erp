@@ -4,6 +4,7 @@ import {
   editEmployee,
   getEmployees,
   patchEmployeeStatus,
+  removeEmployee,
   storeEmployee,
   getSalaryConfig,
   saveSalaryConfig,
@@ -31,6 +32,7 @@ const employeeSchema = z.object({
 router.get("/", getEmployees);
 router.post("/", validateBody(employeeSchema), storeEmployee);
 router.put("/:id", validateBody(employeeSchema), editEmployee);
+router.delete("/:id", removeEmployee);
 router.patch(
   "/:id/status",
   validateBody(z.object({ status: z.enum(["aktif", "nonaktif"]) })),

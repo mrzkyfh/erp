@@ -5,6 +5,9 @@ import {
   createPurchase,
   createStockUsage,
   createSupplier,
+  deleteInventoryItem,
+  deleteStockUsage,
+  deleteSupplier,
   getInventoryOverview,
   createMaterialExpense,
   getLatestItemPrice,
@@ -22,9 +25,21 @@ export async function storeInventoryItem(c) {
   return c.json({ data }, 201);
 }
 
+export async function removeInventoryItem(c) {
+  const itemId = c.req.param("id");
+  await deleteInventoryItem(itemId);
+  return c.json({ message: "Item berhasil dihapus." });
+}
+
 export async function storeSupplier(c) {
   const data = await createSupplier(c.get("validatedBody"));
   return c.json({ data }, 201);
+}
+
+export async function removeSupplier(c) {
+  const supplierId = c.req.param("id");
+  await deleteSupplier(supplierId);
+  return c.json({ message: "Supplier berhasil dihapus." });
 }
 
 export async function storePurchase(c) {
@@ -46,7 +61,11 @@ export async function storeUsage(c) {
   return c.json({ data }, 201);
 }
 
-
+export async function removeUsage(c) {
+  const usageId = c.req.param("id");
+  await deleteStockUsage(usageId);
+  return c.json({ message: "Data penggunaan berhasil dihapus." });
+}
 
 export async function storeMaterialExpense(c) {
   const profile = c.get("profile");
@@ -59,5 +78,3 @@ export async function getLatestPrice(c) {
   const price = await getLatestItemPrice(itemId);
   return c.json({ data: { price } });
 }
-
-

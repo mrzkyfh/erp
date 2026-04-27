@@ -1,5 +1,6 @@
 import {
   createEmployee,
+  deleteEmployee,
   listEmployees,
   updateEmployee,
   updateEmployeeStatus,
@@ -22,6 +23,12 @@ export async function editEmployee(c) {
   const id = c.req.param("id");
   await updateEmployee(id, c.get("validatedBody"));
   return c.json({ message: "Data karyawan berhasil diperbarui." });
+}
+
+export async function removeEmployee(c) {
+  const id = c.req.param("id");
+  await deleteEmployee(id);
+  return c.json({ message: "Karyawan berhasil dihapus." });
 }
 
 export async function patchEmployeeStatus(c) {

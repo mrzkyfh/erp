@@ -2,6 +2,9 @@ import { Hono } from "hono";
 import { z } from "zod";
 import {
   inventoryOverview,
+  removeInventoryItem,
+  removeSupplier,
+  removeUsage,
   storeInventoryItem,
   storePurchase,
   storeSupplier,
@@ -36,6 +39,8 @@ router.post(
   ),
   storeInventoryItem,
 );
+router.delete("/items/:id", requireRoles("owner"), removeInventoryItem);
+
 router.post(
   "/suppliers",
   requireRoles("owner"),
@@ -48,6 +53,7 @@ router.post(
   ),
   storeSupplier,
 );
+router.delete("/suppliers/:id", requireRoles("owner"), removeSupplier);
 router.post(
   "/purchases",
   requireRoles("owner"),
@@ -76,6 +82,7 @@ router.post(
   ),
   storeUsage,
 );
+router.delete("/usages/:id", requireRoles("owner"), removeUsage);
 
 // Owner/Manager bisa record material expenses
 router.post(

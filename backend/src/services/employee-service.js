@@ -174,6 +174,47 @@ export async function updateEmployeeStatus(employeeId, status) {
   if (profileError) throw new AppError(profileError.message, 500);
 }
 
+export async function deleteEmployee(employeeId) {
+  console.log(`Starting delete for employee ${employeeId}`);
+  
+  // Get employee profile_id first
+  const { data: employee, error: fetchError } = await supabaseAdmin
+    .from("employees")
+    .select("profile_id")
+    .eq("id", employeeId)
+    .single();
+    
+  if (fetchError || !employee) throw new AppError("Karyawan tidak ditemukan.", 404);
+  
+  const profileId = employee.profile_id;
+  
+  // Delete from employees table (will cascade to related tables)
+  const { error: employeeError } = await supabaseAdmin
+    .from("employees")
+    .delete()
+    .eq("id", employeeId);
+    
+  if (employeeError) throw new AppError(employeeError.message, 500);
+  
+  // Delete from profiles table
+  const { error: profileError } = await supabaseAdmin
+    .from("profiles")
+    .delete()
+    .eq("id", profileId);
+    
+  if (profileError) throw new AppError(profileError.message, 500);
+  
+  // Delete auth user
+  const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(profileId);
+  if (authError) {
+    console.error("Auth delete error:", authError.message);
+    // Don't throw error here, as the database records are already deleted
+  }
+  
+  console.log("Employee deleted successfully.");
+  return true;
+}
+
 export async function getEmployeeSalaryConfig(employeeId) {
   const { data, error } = await supabaseAdmin
     .from("employee_salary_components")

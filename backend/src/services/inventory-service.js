@@ -206,4 +206,86 @@ export async function getLatestItemPrice(itemId) {
   return price;
 }
 
+export async function deleteInventoryItem(itemId) {
+  // Check if item has any transactions
+  const { data: purchases } = await supabaseAdmin
+    .from("stock_purchase_items")
+    .select("id")
+    .eq("item_id", itemId)
+    .limit(1);
+    
+  const { data: usages } = await supabaseAdmin
+    .from("stock_usages")
+    .select("id")
+    .eq("item_id", itemId)
+    .limit(1);
+    
+  if ((purchases && purchases.length > 0) || (usages && usages.length > 0)) {
+    throw new AppError("Item tidak dapat dihapus karena sudah memiliki riwayat transaksi.", 422);
+  }
+  
+  const { error } = await supabaseAdmin
+    .from("inventory_items")
+    .delete()
+    .eq("id", itemId);
+    
+  if (error) throw new AppError(error.message, 500);
+  return true;
+}
 
+export async function deleteSupplier(supplierId) {
+  // Check if supplier has any purchases
+  const { data: purchases } = await supabaseAdmin
+    .from("stock_purchases")
+    .select("id")
+    .eq("supplier_id", supplierId)
+    .limit(1);
+    
+  if (purchases && purchases.length > 0) {
+    throw new AppError("Supplier tidak dapat dihapus karena sudah memiliki riwayat pembelian.", 422);
+  }
+  
+  const { error } = await supabaseAdmin
+    .from("suppliers")
+    .delete()
+    .eq("id", supplierId);
+    
+  if (error) throw new AppError(error.message, 500);
+  return true;
+}
+
+export async function deleteStockUsage(usageId) {
+  // Get usage details first
+  const { data: usage, error: fetchError } = await supabaseAdmin
+    .from("stock_usages")
+    .select("item_id, qty")
+    .eq("id", usageId)
+    .single();
+    
+  if (fetchError || !usage) throw new AppError("Data penggunaan tidak ditemukan.", 404);
+  
+  // Restore stock
+  const { data: currentItem } = await supabaseAdmin
+    .from("inventory_items")
+    .select("current_stock")
+    .eq("id", usage.item_id)
+    .single();
+    
+  if (currentItem) {
+    await supabaseAdmin
+      .from("inventory_items")
+      .update({
+        current_stock: Number(currentItem.current_stock || 0) + Number(usage.qty),
+      })
+      .eq("id", usage.item_id);
+  }
+  
+  // Delete usage record
+  const { error } = await supabaseAdmin
+    .from("stock_usages")
+    .delete()
+    .eq("id", usageId);
+    
+  if (error) throw new AppError(error.message, 500);
+  return true;
+}
