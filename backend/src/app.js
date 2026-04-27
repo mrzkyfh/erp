@@ -31,7 +31,7 @@ export function createApp() {
   app.get("/health", (c) => {
     return c.json({
       ok: true,
-      message: "ERP Mini backend siap digunakan (Hono).",
+      message: "Rumah Kue Nuraisah backend siap digunakan.",
       timezone: env.APP_TIMEZONE,
     });
   });

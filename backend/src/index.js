@@ -13,7 +13,7 @@ if (process.env.NODE_ENV !== "production") {
     fetch: app.fetch,
     port: env.PORT,
   }, (info) => {
-    console.log(`Backend berjalan di http://localhost:${info.port}`);
+    console.log(`Rumah Kue Nuraisah Backend berjalan di http://localhost:${info.port}`);
   });
 }
 

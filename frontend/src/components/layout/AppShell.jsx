@@ -48,8 +48,8 @@ export function AppShell({ children }) {
       <aside className="hidden md:fixed md:inset-y-4 md:left-4 md:z-20 md:flex md:w-[280px] md:flex-col md:rounded-xl md:border md:border-slate-200 md:bg-white md:shadow-lg">
         {/* Logo */}
         <div className="m-4 mb-6 rounded-lg bg-gradient-to-br from-slate-600 to-slate-800 p-4 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">ERP Mini</p>
-          <p className="text-[10px] text-slate-300 mt-0.5">UMKM Management</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">Rumah Kue Nuraisah</p>
+          <p className="text-[10px] text-slate-300 mt-0.5">Sistem Manajemen</p>
         </div>
 
         {/* Navigation */}
@@ -165,8 +165,8 @@ export function AppShell({ children }) {
       >
         {/* Logo */}
         <div className="m-4 mb-6 rounded-lg bg-gradient-to-br from-slate-600 to-slate-800 p-4 shadow-sm">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">ERP Mini</p>
-          <p className="text-[10px] text-slate-300 mt-0.5">UMKM Management</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">Rumah Kue Nuraisah</p>
+          <p className="text-[10px] text-slate-300 mt-0.5">Sistem Manajemen</p>
         </div>
 
         {/* Navigation */}
