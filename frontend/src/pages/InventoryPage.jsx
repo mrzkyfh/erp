@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,14 @@ export function InventoryPage() {
     usages: [],
   });
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // State untuk filter tanggal riwayat transaksi
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+  });
+  const [filteredPurchases, setFilteredPurchases] = useState([]);
+  const [filteredUsages, setFilteredUsages] = useState([]);
 
   const filteredItems = overview.items.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -37,6 +45,26 @@ export function InventoryPage() {
       toast.error(error.message);
     }
   };
+  
+  // Filter transaksi berdasarkan tanggal yang dipilih
+  useEffect(() => {
+    if (selectedDate) {
+      const filtered = overview.purchases.filter(purchase => {
+        const purchaseDate = new Date(purchase.date).toISOString().split('T')[0];
+        return purchaseDate === selectedDate;
+      });
+      setFilteredPurchases(filtered);
+      
+      const filteredUsage = overview.usages.filter(usage => {
+        const usageDate = new Date(usage.date).toISOString().split('T')[0];
+        return usageDate === selectedDate;
+      });
+      setFilteredUsages(filteredUsage);
+    } else {
+      setFilteredPurchases(overview.purchases);
+      setFilteredUsages(overview.usages);
+    }
+  }, [selectedDate, overview.purchases, overview.usages]);
 
   useEffect(() => {
     loadData();
@@ -174,41 +202,98 @@ export function InventoryPage() {
       <Card>
         <CardHeader>
           <CardTitle>Riwayat Transaksi</CardTitle>
-          <CardDescription>Histori pembelian dan penggunaan stok terbaru.</CardDescription>
+          <CardDescription>Pilih tanggal untuk melihat transaksi pada hari tersebut.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-6 md:grid-cols-2">
-          <div>
-            <p className="mb-3 text-sm font-semibold text-slate-900">Pembelian Terbaru</p>
-            <div className="space-y-2">
-              {overview.purchases.length > 0 ? (
-                overview.purchases.map((purchase) => (
-                  <div key={purchase.id} className="rounded-lg border border-slate-200 bg-white p-3">
-                    <p className="font-medium text-slate-900">{purchase.supplier?.name}</p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {formatDateID(purchase.date)} • {formatRupiah(purchase.total_amount)}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-slate-500 py-4 text-center">Tidak ada pembelian</p>
-              )}
+        <CardContent className="space-y-4">
+          {/* Date Picker */}
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+            <div className="flex items-center gap-2 flex-1">
+              <Calendar className="h-5 w-5 text-slate-600" />
+              <Input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="flex-1"
+              />
+            </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  const today = new Date();
+                  setSelectedDate(today.toISOString().split('T')[0]);
+                }}
+                className="flex-1 sm:flex-none"
+              >
+                Hari Ini
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setSelectedDate("")}
+                className="flex-1 sm:flex-none"
+              >
+                Semua
+              </Button>
             </div>
           </div>
-          <div>
-            <p className="mb-3 text-sm font-semibold text-slate-900">Penggunaan Terbaru</p>
-            <div className="space-y-2">
-              {overview.usages.length > 0 ? (
-                overview.usages.map((usage) => (
-                  <div key={usage.id} className="rounded-lg border border-slate-200 bg-white p-3">
-                    <p className="font-medium text-slate-900">{usage.item?.name}</p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {usage.qty} {usage.item?.unit} • {usage.reason}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-slate-500 py-4 text-center">Tidak ada penggunaan</p>
-              )}
+          
+          {/* Transaction Summary */}
+          {selectedDate && (
+            <div className="rounded-lg bg-blue-50 border border-blue-200 p-3">
+              <p className="text-sm text-blue-900">
+                📅 Menampilkan transaksi pada <strong>{formatDateID(selectedDate)}</strong>
+              </p>
+              <p className="text-xs text-blue-700 mt-1">
+                {filteredPurchases.length} pembelian • {filteredUsages.length} penggunaan
+              </p>
+            </div>
+          )}
+
+          {/* Transactions Grid */}
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <p className="mb-3 text-sm font-semibold text-slate-900">
+                Pembelian {selectedDate ? `(${filteredPurchases.length})` : ''}
+              </p>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {filteredPurchases.length > 0 ? (
+                  filteredPurchases.map((purchase) => (
+                    <div key={purchase.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                      <p className="font-medium text-slate-900">{purchase.supplier?.name}</p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {formatDateID(purchase.date)} • {formatRupiah(purchase.total_amount)}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500 py-4 text-center">
+                    {selectedDate ? "Tidak ada pembelian pada tanggal ini" : "Tidak ada pembelian"}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div>
+              <p className="mb-3 text-sm font-semibold text-slate-900">
+                Penggunaan {selectedDate ? `(${filteredUsages.length})` : ''}
+              </p>
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {filteredUsages.length > 0 ? (
+                  filteredUsages.map((usage) => (
+                    <div key={usage.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                      <p className="font-medium text-slate-900">{usage.item?.name}</p>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {usage.qty} {usage.item?.unit} • {usage.reason}
+                      </p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-slate-500 py-4 text-center">
+                    {selectedDate ? "Tidak ada penggunaan pada tanggal ini" : "Tidak ada penggunaan"}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>
