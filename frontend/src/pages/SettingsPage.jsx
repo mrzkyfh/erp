@@ -194,25 +194,25 @@ export function SettingsPage() {
             <CardDescription>Panduan penggunaan pengaturan jam kerja.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="rounded-lg border border-border bg-white p-4">
-              <p className="font-medium mb-2">🕐 Jam Mulai Kerja</p>
-              <p className="text-sm text-muted-foreground">
+            <div className="rounded-lg border border-slate-200 bg-white p-4">
+              <p className="font-medium mb-2 text-slate-900">🕐 Jam Mulai Kerja</p>
+              <p className="text-sm text-slate-600">
                 Waktu standar dimulainya jam kerja. Digunakan sebagai acuan untuk menentukan status keterlambatan
                 karyawan.
               </p>
             </div>
 
-            <div className="rounded-lg border border-border bg-white p-4">
-              <p className="font-medium mb-2">⏱️ Toleransi Keterlambatan</p>
-              <p className="text-sm text-muted-foreground">
+            <div className="rounded-lg border border-slate-200 bg-white p-4">
+              <p className="font-medium mb-2 text-slate-900">⏱️ Toleransi Keterlambatan</p>
+              <p className="text-sm text-slate-600">
                 Waktu tambahan (dalam menit) setelah jam mulai kerja. Karyawan yang check-in dalam periode toleransi
                 masih dianggap "Hadir", bukan "Telat".
               </p>
             </div>
 
-            <div className="rounded-lg border border-border bg-white p-4">
-              <p className="font-medium mb-2">📊 Status Absensi</p>
-              <ul className="text-sm text-muted-foreground space-y-1 mt-2">
+            <div className="rounded-lg border border-slate-200 bg-white p-4">
+              <p className="font-medium mb-2 text-slate-900">📊 Status Absensi</p>
+              <ul className="text-sm text-slate-600 space-y-1 mt-2">
                 <li>• <strong>Hadir</strong>: Check-in sebelum batas telat</li>
                 <li>• <strong>Telat</strong>: Check-in setelah batas telat</li>
                 <li>• <strong>Izin</strong>: Karyawan mengajukan izin</li>
@@ -220,11 +220,10 @@ export function SettingsPage() {
               </ul>
             </div>
 
-            <div className="rounded-lg bg-amber-50 border border-amber-200 p-4">
-              <p className="font-medium text-amber-900 mb-2">💡 Tips</p>
-              <p className="text-sm text-amber-700">
-                Sesuaikan toleransi dengan kondisi bisnis Anda. Toleransi yang terlalu ketat dapat menurunkan moral
-                karyawan, sedangkan terlalu longgar dapat mengurangi disiplin.
+            <div className="rounded-lg bg-green-50 border border-green-200 p-4">
+              <p className="font-medium text-green-900 mb-2">✅ Jam Kerja Saat Ini</p>
+              <p className="text-sm text-green-700">
+                Jam kerja telah diatur mulai pukul <strong>{settings.work_start_time?.substring(0, 5) || "08:00"}</strong> dengan toleransi keterlambatan <strong>{settings.tolerance_minutes} menit</strong>.
               </p>
             </div>
           </CardContent>
