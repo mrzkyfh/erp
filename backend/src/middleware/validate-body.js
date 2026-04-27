@@ -9,7 +9,9 @@ export function validateBody(schema) {
     
     const result = schema.safeParse(body);
     if (!result.success) {
-      return c.json({ message: result.error.issues[0]?.message || "Payload tidak valid." }, 422);
+      const firstError = result.error.issues[0];
+      const message = firstError ? `${firstError.path.join(".")}: ${firstError.message}` : "Payload tidak valid.";
+      return c.json({ message }, 422);
     }
 
     c.set("validatedBody", result.data);

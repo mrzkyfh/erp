@@ -5,10 +5,8 @@ compatibility_date = "2026-04-26"
 compatibility_flags = [ "nodejs_compat" ]
 
 [vars]
-# Variabel environment untuk production akan diatur via dashboard Cloudflare atau 'wrangler secret'
-SUPABASE_URL = ""
-SUPABASE_ANON_KEY = ""
-SUPABASE_SERVICE_ROLE_KEY = ""
-FRONTEND_URL = ""
+SUPABASE_URL = "https://ybqaxgeilgysszijvldh.supabase.co"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlicWF4Z2VpbGd5c3N6aWp2bGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMDUxOTksImV4cCI6MjA5Mjc4MTE5OX0._MrV3GKNjvR-Yab1oBVzBYTv21ByKB-faykDqIocnrw"
+SUPABASE_SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlicWF4Z2VpbGd5c3N6aWp2bGRoIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzIwNTE5OSwiZXhwIjoyMDkyNzgxMTk5fQ.9hi6F7HuiVjbjsQkqZqRPXLe8Mty7W4HRJan04KqL4M"
+FRONTEND_URL = "https://erp-4l6.pages.dev"
 APP_TIMEZONE = "Asia/Jakarta"
-

@@ -1,9 +1,10 @@
 import {
   createEmployee,
   listEmployees,
-  listJobdesks,
   updateEmployee,
   updateEmployeeStatus,
+  getEmployeeSalaryConfig,
+  updateEmployeeSalaryConfig,
 } from "../services/employee-service.js";
 
 export async function getEmployees(c) {
@@ -11,10 +12,6 @@ export async function getEmployees(c) {
   return c.json({ data });
 }
 
-export async function getJobdesks(c) {
-  const data = await listJobdesks();
-  return c.json({ data });
-}
 
 export async function storeEmployee(c) {
   const data = await createEmployee(c.get("validatedBody"));
@@ -33,4 +30,15 @@ export async function patchEmployeeStatus(c) {
   return c.json({ message: "Status karyawan berhasil diperbarui." });
 }
 
+export async function getSalaryConfig(c) {
+  const id = c.req.param("id");
+  const data = await getEmployeeSalaryConfig(id);
+  return c.json({ data });
+}
 
+export async function saveSalaryConfig(c) {
+  const id = c.req.param("id");
+  const body = await c.req.json();
+  await updateEmployeeSalaryConfig(id, body.components);
+  return c.json({ message: "Konfigurasi gaji berhasil disimpan." });
+}

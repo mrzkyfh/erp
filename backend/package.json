@@ -4,10 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node src/index.js",
+    "dev": "node --watch src/index.js",
     "start": "node src/index.js",
     "deploy": "wrangler deploy",
-    "dev:worker": "wrangler dev"
+    "dev:worker": "wrangler dev",
+    "update-location": "node update-location.js"
   },
   "dependencies": {
     "@hono/node-server": "^2.0.0",

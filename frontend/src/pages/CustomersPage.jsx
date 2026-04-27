@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Search } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,16 +8,15 @@ import { Table, TBody, TD, TH, THead, TR } from "@/components/ui/table";
 import { FormField } from "@/components/forms/FormField";
 import { api } from "@/lib/api";
 
-const initialForm = { id: null, name: "", phone: "", email: "", address: "", notes: "" };
+const initialForm = { id: null, name: "", phone: "", address: "", notes: "" };
 
 export function CustomersPage() {
   const [customers, setCustomers] = useState([]);
   const [form, setForm] = useState(initialForm);
-  const [search, setSearch] = useState("");
 
   const loadCustomers = async () => {
     try {
-      const response = await api.get("/customers", { search });
+      const response = await api.get("/customers");
       setCustomers(response.data);
     } catch (error) {
       toast.error(error.message);
@@ -27,7 +25,7 @@ export function CustomersPage() {
 
   useEffect(() => {
     loadCustomers();
-  }, [search]);
+  }, []);
 
   return (
     <div className="grid gap-4 xl:grid-cols-[0.9fr,1.1fr]">
@@ -42,14 +40,9 @@ export function CustomersPage() {
           <FormField label="Nama">
             <Input value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} />
           </FormField>
-          <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Nomor HP">
-              <Input value={form.phone} onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))} />
-            </FormField>
-            <FormField label="Email">
-              <Input value={form.email} onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))} />
-            </FormField>
-          </div>
+          <FormField label="Nomor HP">
+            <Input value={form.phone} onChange={(e) => setForm((prev) => ({ ...prev, phone: e.target.value }))} />
+          </FormField>
           <FormField label="Alamat">
             <Textarea value={form.address} onChange={(e) => setForm((prev) => ({ ...prev, address: e.target.value }))} />
           </FormField>
@@ -91,11 +84,7 @@ export function CustomersPage() {
         <CardHeader>
           <div>
             <CardTitle>Daftar Konsumen</CardTitle>
-            <CardDescription>Pencarian cepat berdasarkan nama, email, atau nomor HP.</CardDescription>
-          </div>
-          <div className="relative w-full max-w-sm">
-            <Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
-            <Input className="pl-9" placeholder="Cari konsumen..." value={search} onChange={(e) => setSearch(e.target.value)} />
+            <CardDescription>Kelola data konsumen untuk CRM dasar dan histori transaksi.</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
@@ -117,7 +106,6 @@ export function CustomersPage() {
                   </TD>
                   <TD>
                     <p>{customer.phone}</p>
-                    <p className="text-xs text-muted-foreground">{customer.email || "-"}</p>
                   </TD>
                   <TD>{customer.address || "-"}</TD>
                   <TD>

@@ -1,5 +1,13 @@
+import fs from "fs";
+import path from "path";
 import { AppError } from "../utils/app-error.js";
 import { supabaseAdmin } from "./supabase.js";
+
+function logDebug(message, data = null) {
+  const logMessage = `[${new Date().toISOString()}] ${message} ${data ? JSON.stringify(data) : ""}\n`;
+  fs.appendFileSync(path.resolve(process.cwd(), "backend-debug.log"), logMessage);
+}
+
 
 export async function getInventoryOverview() {
   const [itemsResult, categoriesResult, suppliersResult, purchasesResult, usagesResult] = await Promise.all([
@@ -70,7 +78,12 @@ export async function createPurchase(payload, createdBy) {
     .select("*")
     .single();
 
-  if (purchaseError) throw new AppError(purchaseError.message, 500);
+  if (purchaseError) {
+    logDebug("Error creating purchase", purchaseError);
+    throw new AppError(purchaseError.message, 500);
+  }
+  logDebug("Purchase created successfully", purchase);
+
 
   const { error: itemError } = await supabaseAdmin.from("stock_purchase_items").insert({
     purchase_id: purchase.id,
@@ -78,7 +91,11 @@ export async function createPurchase(payload, createdBy) {
     qty: payload.qty,
     unit_price: payload.unit_price,
   });
-  if (itemError) throw new AppError(itemError.message, 500);
+  if (itemError) {
+    logDebug("Error creating purchase items", itemError);
+    throw new AppError(itemError.message, 500);
+  }
+
 
   const { data: currentItem } = await supabaseAdmin
     .from("inventory_items")
@@ -136,3 +153,57 @@ export async function createStockUsage(payload, createdBy, usedBy) {
 
   return data;
 }
+
+export async function createMaterialExpense(payload, createdBy) {
+  // Material expense is similar to stock usage, but we store it with a specific reason prefix
+  const { data: currentItem, error: itemError } = await supabaseAdmin
+    .from("inventory_items")
+    .select("current_stock")
+    .eq("id", payload.item_id)
+    .single();
+
+  if (itemError || !currentItem) throw new AppError("Item inventori tidak ditemukan.", 404);
+  
+  // We don't reduce stock for material expenses, just record the expense
+  // Store in stock_usages with a special reason format
+  const expenseReason = `[PENGELUARAN] ${payload.reason || 'Pengeluaran bahan'} - Rp ${payload.total_expense.toLocaleString('id-ID')}`;
+  
+  const { data, error } = await supabaseAdmin
+    .from("stock_usages")
+    .insert({
+      item_id: payload.item_id,
+      qty: payload.qty,
+      reason: expenseReason,
+      used_by: null, // No specific user for material expenses
+      date: payload.date,
+      created_by: createdBy,
+    })
+    .select("*")
+    .single();
+
+  if (error) throw new AppError(error.message, 500);
+
+  return data;
+}
+
+export async function getLatestItemPrice(itemId) {
+  logDebug(`Fetching latest price for itemId: ${itemId}`);
+  const { data, error } = await supabaseAdmin
+    .from("stock_purchase_items")
+    .select("unit_price")
+    .eq("item_id", itemId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    logDebug("Error fetching latest price", error);
+    return 0;
+  }
+  
+  const price = data?.unit_price || 0;
+  logDebug(`Found price: ${price}`);
+  return price;
+}
+
+

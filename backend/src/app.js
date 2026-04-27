@@ -12,10 +12,11 @@ export function createApp() {
     
     return cors({
       origin: (origin) => {
-        // Izinkan jika origin terdaftar atau berasal dari domain .pages.dev milik Anda
-        if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".pages.dev")) {
+        // Izinkan jika origin terdaftar, berasal dari domain .pages.dev, atau dari localhost
+        if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".pages.dev") || origin.startsWith("http://localhost:")) {
           return origin;
         }
+
         return allowedOrigins[0]; // Fallback ke origin pertama
       },
       credentials: true,
@@ -41,7 +42,9 @@ export function createApp() {
   app.notFound((c) => c.json({ message: "Endpoint tidak ditemukan" }, 404));
   app.onError((err, c) => {
     console.error(err);
-    return c.json({ message: err.message || "Internal Server Error" }, 500);
+    const message = err.message || "Internal Server Error";
+    const stack = process.env.NODE_ENV !== "production" ? err.stack : undefined;
+    return c.json({ message, stack }, err.statusCode || 500);
   });
 
   return app;

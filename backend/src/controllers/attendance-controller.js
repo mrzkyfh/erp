@@ -26,13 +26,15 @@ export async function attendanceLogs(c) {
 
 export async function checkIn(c) {
   const profile = c.get("profile");
-  const data = await checkInAttendance(profile, c.get("validatedBody"));
+  const body = c.get("validatedBody") || await c.req.json().catch(() => ({}));
+  const data = await checkInAttendance(profile, body);
   return c.json({ data }, 201);
 }
 
 export async function checkOut(c) {
   const profile = c.get("profile");
-  const data = await checkOutAttendance(profile, c.get("validatedBody"));
+  const body = c.get("validatedBody") || await c.req.json().catch(() => ({}));
+  const data = await checkOutAttendance(profile, body);
   return c.json({ data });
 }
 

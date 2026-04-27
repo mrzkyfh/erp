@@ -4,7 +4,7 @@ import { supabaseAdmin } from "./supabase.js";
 export async function listCustomers(search = "") {
   let query = supabaseAdmin.from("customers").select("*").order("created_at", { ascending: false });
   if (search) {
-    query = query.or(`name.ilike.%${search}%,email.ilike.%${search}%,phone.ilike.%${search}%`);
+    query = query.or(`name.ilike.%${search}%,phone.ilike.%${search}%`);
   }
 
   const { data, error } = await query;

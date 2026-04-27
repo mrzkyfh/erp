@@ -4,16 +4,6 @@ import { isLate, nowJakarta, todayDate } from "../utils/time.js";
 import { getEmployeeByProfileId } from "./employee-service.js";
 import { supabaseAdmin } from "./supabase.js";
 
-function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
-  const toRadians = (value) => (value * Math.PI) / 180;
-  const earthRadius = 6371000;
-  const dLat = toRadians(lat2 - lat1);
-  const dLon = toRadians(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRadians(lat1)) * Math.cos(toRadians(lat2)) * Math.sin(dLon / 2) ** 2;
-  return earthRadius * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-}
 
 async function getBusinessSettings() {
   const { data, error } = await supabaseAdmin.from("business_settings").select("*").limit(1).single();
@@ -124,16 +114,6 @@ export async function checkInAttendance(profile, payload) {
   const session = await findActiveSession(payload.qr_token);
   const currentTime = nowJakarta().toISOString();
 
-  const distance = calculateDistanceMeters(
-    Number(payload.latitude),
-    Number(payload.longitude),
-    Number(settings.latitude),
-    Number(settings.longitude),
-  );
-
-  if (distance > Number(settings.attendance_radius_meters || 100)) {
-    throw new AppError("Lokasi di luar radius absensi yang diizinkan.", 422);
-  }
 
   const { data: existingLog } = await supabaseAdmin
     .from("attendance_logs")
@@ -156,9 +136,6 @@ export async function checkInAttendance(profile, payload) {
       session_id: session.id,
       check_in_at: currentTime,
       status,
-      latitude: payload.latitude,
-      longitude: payload.longitude,
-      distance_meters: distance,
     })
     .select("*")
     .single();
@@ -171,16 +148,6 @@ export async function checkInAttendance(profile, payload) {
 export async function checkOutAttendance(profile, payload) {
   const employee = await getEmployeeByProfileId(profile.id);
   const settings = await getBusinessSettings();
-  const distance = calculateDistanceMeters(
-    Number(payload.latitude),
-    Number(payload.longitude),
-    Number(settings.latitude),
-    Number(settings.longitude),
-  );
-
-  if (distance > Number(settings.attendance_radius_meters || 100)) {
-    throw new AppError("Lokasi di luar radius absensi yang diizinkan.", 422);
-  }
 
   const { data: log, error: logError } = await supabaseAdmin
     .from("attendance_logs")
@@ -197,7 +164,6 @@ export async function checkOutAttendance(profile, payload) {
     .from("attendance_logs")
     .update({
       check_out_at: nowJakarta().toISOString(),
-      distance_meters: distance,
     })
     .eq("id", log.id)
     .select("*")

@@ -9,7 +9,7 @@ const router = new Hono();
 router.get("/periods", payrollPeriods);
 router.post(
   "/process",
-  requireRoles("owner", "manager"),
+  requireRoles("owner"),
   validateBody(
     z.object({
       month: z.number().min(1).max(12),

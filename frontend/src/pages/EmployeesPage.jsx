@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, RefreshCcw, Trash2 } from "lucide-react";
+import { Pencil, RefreshCcw, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,46 +10,45 @@ import { Badge } from "@/components/ui/badge";
 import { FormField } from "@/components/forms/FormField";
 import { api } from "@/lib/api";
 import { formatDateID, formatRupiah, getStatusBadgeTone } from "@/lib/utils";
+import { SalaryConfigModal } from "@/components/employees/SalaryConfigModal";
+
 
 const emptyForm = {
   id: null,
   email: "",
   password: "",
   full_name: "",
-  nik: "",
   phone: "",
   address: "",
   role: "karyawan",
   join_date: "",
-  salary_type: "bulanan",
-  base_salary: "",
-  allowance: "",
-  default_deduction: "",
+  base_salary: 0,
+  allowance: 0,
+  default_deduction: 0,
   status: "aktif",
-  jobdesk_ids: [],
 };
+
 
 export function EmployeesPage() {
   const [employees, setEmployees] = useState([]);
-  const [jobdesks, setJobdesks] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [salaryModalOpen, setSalaryModalOpen] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+
 
   const isEdit = Boolean(form.id);
 
-  const salaryPreview = useMemo(() => {
-    return formatRupiah((Number(form.base_salary || 0) + Number(form.allowance || 0)) || 0);
-  }, [form.allowance, form.base_salary]);
+
 
   const loadData = async () => {
     try {
-      const [employeesResponse, jobdesksResponse] = await Promise.all([
+      const [employeesResponse] = await Promise.all([
         api.get("/employees"),
-        api.get("/employees/jobdesks"),
       ]);
       setEmployees(employeesResponse.data);
-      setJobdesks(jobdesksResponse.data);
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -134,9 +133,7 @@ export function EmployeesPage() {
               <FormField label="Password awal" hint={isEdit ? "Kosongkan jika tidak diubah" : "Minimal 6 karakter"}>
                 <Input type="password" value={form.password} onChange={(e) => updateForm("password", e.target.value)} />
               </FormField>
-              <FormField label="NIK">
-                <Input value={form.nik} onChange={(e) => updateForm("nik", e.target.value)} />
-              </FormField>
+
               <FormField label="Nomor HP">
                 <Input value={form.phone} onChange={(e) => updateForm("phone", e.target.value)} />
               </FormField>
@@ -150,7 +147,6 @@ export function EmployeesPage() {
                   onChange={(e) => updateForm("role", e.target.value)}
                 >
                   <option value="owner">Owner</option>
-                  <option value="manager">Manager</option>
                   <option value="karyawan">Karyawan</option>
                 </select>
               </FormField>
@@ -164,33 +160,7 @@ export function EmployeesPage() {
                   <option value="nonaktif">Nonaktif</option>
                 </select>
               </FormField>
-              <FormField label="Tipe gaji">
-                <select
-                  className="h-11 w-full rounded-xl border border-border bg-white px-3 text-sm"
-                  value={form.salary_type}
-                  onChange={(e) => updateForm("salary_type", e.target.value)}
-                >
-                  <option value="harian">Harian</option>
-                  <option value="bulanan">Bulanan</option>
-                </select>
-              </FormField>
-              <FormField label="Gaji pokok">
-                <Input
-                  type="number"
-                  min="0"
-                  value={form.base_salary}
-                  onChange={(e) => updateForm("base_salary", e.target.value)}
-                />
-              </FormField>
-              <FormField label="Tunjangan">
-                <Input
-                  type="number"
-                  min="0"
-                  value={form.allowance}
-                  onChange={(e) => updateForm("allowance", e.target.value)}
-                />
-              </FormField>
-              <FormField label="Potongan default">
+              <FormField label="Potongan bulanan default">
                 <Input
                   type="number"
                   min="0"
@@ -198,35 +168,11 @@ export function EmployeesPage() {
                   onChange={(e) => updateForm("default_deduction", e.target.value)}
                 />
               </FormField>
-              <FormField label="Estimasi total" hint="Gaji pokok + tunjangan">
-                <Input value={salaryPreview} readOnly />
-              </FormField>
+
               <div className="md:col-span-2">
                 <FormField label="Alamat">
                   <Textarea value={form.address} onChange={(e) => updateForm("address", e.target.value)} />
                 </FormField>
-              </div>
-              <div className="md:col-span-2 space-y-3">
-                <p className="text-sm font-medium">Jobdesk</p>
-                <div className="grid gap-2 md:grid-cols-3">
-                  {jobdesks.map((jobdesk) => (
-                    <label key={jobdesk.id} className="flex items-center gap-2 rounded-2xl border border-border bg-white p-3 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={form.jobdesk_ids.includes(jobdesk.id)}
-                        onChange={(e) =>
-                          updateForm(
-                            "jobdesk_ids",
-                            e.target.checked
-                              ? [...form.jobdesk_ids, jobdesk.id]
-                              : form.jobdesk_ids.filter((item) => item !== jobdesk.id),
-                          )
-                        }
-                      />
-                      <span>{jobdesk.name}</span>
-                    </label>
-                  ))}
-                </div>
               </div>
               <div className="md:col-span-2">
                 <Button type="submit" disabled={saving}>
@@ -253,7 +199,6 @@ export function EmployeesPage() {
                   <TR>
                     <TH>Nama</TH>
                     <TH>Role</TH>
-                    <TH>Jobdesk</TH>
                     <TH>Gaji</TH>
                     <TH>Status</TH>
                     <TH>Aksi</TH>
@@ -270,7 +215,6 @@ export function EmployeesPage() {
                         </p>
                       </TD>
                       <TD>{employee.profile?.role}</TD>
-                      <TD>{(employee.jobdesks ?? []).map((item) => item.name).join(", ") || "-"}</TD>
                       <TD>{formatRupiah(employee.base_salary + employee.allowance)}</TD>
                       <TD>
                         <Badge tone={getStatusBadgeTone(employee.status)}>{employee.status}</Badge>
@@ -280,28 +224,37 @@ export function EmployeesPage() {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="text-primary border-primary/20 hover:bg-primary/5"
+                            onClick={() => {
+                              setSelectedEmployee(employee);
+                              setSalaryModalOpen(true);
+                            }}
+                          >
+                            <Wallet className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() =>
                               setForm({
                                 id: employee.id,
                                 email: employee.profile?.email || "",
                                 password: "",
                                 full_name: employee.profile?.full_name || "",
-                                nik: employee.profile?.nik || "",
                                 phone: employee.profile?.phone || "",
                                 address: employee.profile?.address || "",
                                 role: employee.profile?.role || "karyawan",
                                 join_date: employee.join_date || "",
-                                salary_type: employee.salary_type || "bulanan",
-                                base_salary: employee.base_salary || "",
-                                allowance: employee.allowance || "",
-                                default_deduction: employee.default_deduction || "",
+                                base_salary: employee.base_salary || 0,
+                                allowance: employee.allowance || 0,
+                                default_deduction: employee.default_deduction || 0,
                                 status: employee.status || "aktif",
-                                jobdesk_ids: (employee.jobdesks ?? []).map((item) => item.id),
                               })
                             }
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
+
                           <Button
                             size="sm"
                             variant="destructive"
@@ -329,6 +282,18 @@ export function EmployeesPage() {
           </CardContent>
         </Card>
       </div>
+      
+      {salaryModalOpen && selectedEmployee && (
+        <SalaryConfigModal 
+          employee={selectedEmployee} 
+          onClose={() => {
+            setSalaryModalOpen(false);
+            setSelectedEmployee(null);
+          }} 
+          onSave={loadData}
+        />
+      )}
     </div>
+
   );
 }

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Settings, ChevronDown, ChevronUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +11,14 @@ import { formatDateTimeID, formatRupiah } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 
 export function PayrollPage() {
+  const navigate = useNavigate();
   const profile = useAuthStore((state) => state.profile);
   const [month, setMonth] = useState(String(new Date().getMonth() + 1));
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [periods, setPeriods] = useState([]);
   const [preview, setPreview] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [expandedRow, setExpandedRow] = useState(null);
 
   const loadData = async () => {
     try {
@@ -30,14 +34,27 @@ export function PayrollPage() {
     loadData();
   }, [month, year]);
 
+  const isAdmin = ["owner", "manager"].includes(profile?.role);
+
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Manajemen Penggajian</h1>
+          <p className="text-sm text-muted-foreground">Sistem penggajian otomatis terintegrasi absensi.</p>
+        </div>
+        {isAdmin && (
+          <Button variant="outline" className="gap-2" onClick={() => navigate("/penggajian/pengaturan")}>
+            <Settings className="h-4 w-4" />
+            Pengaturan Gaji
+          </Button>
+        )}
+      </div>
+
       <Card>
         <CardHeader>
-          <div>
-            <CardTitle>Penggajian Otomatis</CardTitle>
-            <CardDescription>Formula: gaji pokok + tunjangan - denda - potongan.</CardDescription>
-          </div>
+          <CardTitle>Proses Payroll</CardTitle>
+          <CardDescription>Pilih periode untuk menghitung atau melihat riwayat gaji.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-[180px,180px,1fr]">
           <label className="space-y-2">
@@ -68,9 +85,10 @@ export function PayrollPage() {
               ))}
             </select>
           </label>
-          {["owner", "manager"].includes(profile?.role) ? (
+          {isAdmin ? (
             <div className="flex items-end">
               <Button
+                className="w-full md:w-auto"
                 disabled={busy}
                 onClick={async () => {
                   setBusy(true);
@@ -89,7 +107,7 @@ export function PayrollPage() {
                   }
                 }}
               >
-                {busy ? "Menghitung..." : "Proses Payroll"}
+                {busy ? "Menghitung..." : "Hitung Payroll Periode Ini"}
               </Button>
             </div>
           ) : null}
@@ -98,91 +116,113 @@ export function PayrollPage() {
 
       <Card>
         <CardHeader>
-          <div>
-            <CardTitle>Preview & Riwayat</CardTitle>
-            <CardDescription>Slip gaji akan terlihat oleh karyawan setelah dikonfirmasi.</CardDescription>
-          </div>
+          <CardTitle>Daftar Gaji Karyawan</CardTitle>
+          <CardDescription>Klik baris untuk melihat rincian kehadiran dan komponen gaji.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 overflow-x-auto">
           <Table>
             <THead>
               <TR>
+                <TH className="w-10"></TH>
                 <TH>Karyawan</TH>
-                <TH>Gaji Pokok</TH>
-                <TH>Tunjangan</TH>
-                <TH>Denda</TH>
+                <TH>Total Gaji Kotor</TH>
                 <TH>Potongan</TH>
                 <TH>Gaji Bersih</TH>
                 <TH>Status</TH>
-                <TH>Dibayar</TH>
+                <TH>Aksi</TH>
               </TR>
             </THead>
             <TBody>
               {preview.map((item) => (
-                <TR key={item.id}>
-                  <TD>{item.employee_name}</TD>
-                  <TD>{formatRupiah(item.base_salary)}</TD>
-                  <TD>{formatRupiah(item.allowance)}</TD>
-                  <TD>{formatRupiah(item.total_fines)}</TD>
-                  <TD>{formatRupiah(item.deductions)}</TD>
-                  <TD className="font-semibold">{formatRupiah(item.net_salary)}</TD>
-                  <TD>
-                    <Badge tone={item.is_paid ? "success" : "warning"}>{item.is_paid ? "Dibayar" : "Menunggu"}</Badge>
-                  </TD>
-                  <TD>
-                    {item.paid_at ? (
-                      formatDateTimeID(item.paid_at)
-                    ) : profile?.role === "owner" ? (
-                      <Button
-                        size="sm"
-                        onClick={async () => {
-                          try {
-                            await api.post(`/payroll/details/${item.id}/pay`, {});
-                            toast.success("Pembayaran payroll dikonfirmasi.");
-                            await loadData();
-                          } catch (error) {
-                            toast.error(error.message);
-                          }
-                        }}
-                      >
-                        Konfirmasi
-                      </Button>
-                    ) : (
-                      "-"
-                    )}
+                <>
+                  <TR 
+                    key={item.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => setExpandedRow(expandedRow === item.id ? null : item.id)}
+                  >
+                    <TD>
+                      {expandedRow === item.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </TD>
+                    <TD className="font-medium">{item.employee_name}</TD>
+                    <TD>{formatRupiah(item.total_allowances)}</TD>
+                    <TD>{formatRupiah(item.deductions)}</TD>
+                    <TD className="font-bold text-primary">{formatRupiah(item.net_salary)}</TD>
+                    <TD>
+                      <Badge tone={item.is_paid ? "success" : "warning"}>
+                        {item.is_paid ? "Sudah Dibayar" : "Menunggu"}
+                      </Badge>
+                    </TD>
+                    <TD onClick={(e) => e.stopPropagation()}>
+                      {item.is_paid ? (
+                        <span className="text-xs text-muted-foreground">{formatDateTimeID(item.paid_at)}</span>
+                      ) : profile?.role === "owner" ? (
+                        <Button
+                          size="sm"
+                          onClick={async () => {
+                            if (!confirm("Konfirmasi pembayaran gaji ini?")) return;
+                            try {
+                              await api.post(`/payroll/details/${item.id}/pay`, {});
+                              toast.success("Pembayaran berhasil dikonfirmasi.");
+                              await loadData();
+                            } catch (error) {
+                              toast.error(error.message);
+                            }
+                          }}
+                        >
+                          Konfirmasi
+                        </Button>
+                      ) : (
+                        "-"
+                      )}
+                    </TD>
+                  </TR>
+                  {expandedRow === item.id && (
+                    <TR className="bg-muted/30">
+                      <TD colSpan={7} className="p-4">
+                        <div className="grid gap-6 md:grid-cols-2">
+                          <div>
+                            <p className="text-sm font-bold mb-2 uppercase tracking-wider text-muted-foreground">Rincian Komponen</p>
+                            <div className="space-y-2">
+                              {item.items?.map((comp) => (
+                                <div key={comp.id} className="flex justify-between text-sm border-b border-border/50 pb-1">
+                                  <span>{comp.name} ({comp.count} {comp.unit === 'per_jam' ? 'Jam' : 'Kehadiran'})</span>
+                                  <span className="font-medium">{formatRupiah(comp.total_amount)}</span>
+                                </div>
+                              ))}
+                              <div className="flex justify-between text-sm font-bold pt-2">
+                                <span>Total Kotor</span>
+                                <span>{formatRupiah(item.total_allowances)}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold mb-2 uppercase tracking-wider text-muted-foreground">Potongan</p>
+                            <div className="flex justify-between text-sm">
+                              <span>Potongan Standar</span>
+                              <span className="text-destructive">-{formatRupiah(item.deductions)}</span>
+                            </div>
+                            <div className="mt-6 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                              <p className="text-xs text-primary font-bold uppercase mb-1">Gaji Bersih Diterima</p>
+                              <p className="text-2xl font-bold text-primary">{formatRupiah(item.net_salary)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </TD>
+                    </TR>
+                  )}
+                </>
+              ))}
+              {preview.length === 0 && (
+                <TR>
+                  <TD colSpan={7} className="text-center py-12 text-muted-foreground">
+                    Belum ada data payroll untuk periode ini.
                   </TD>
                 </TR>
-              ))}
+              )}
             </TBody>
           </Table>
-          {profile?.role === "karyawan" && !preview.length ? (
-            <p className="mt-4 text-sm text-muted-foreground">Slip gaji akan muncul setelah owner mengonfirmasi pembayaran.</p>
-          ) : null}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <div>
-            <CardTitle>Periode Payroll</CardTitle>
-            <CardDescription>Status pemrosesan payroll per bulan.</CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-3 md:grid-cols-3">
-          {periods.map((period) => (
-            <div key={period.id} className="rounded-2xl border border-border bg-white p-4">
-              <p className="font-medium">
-                {period.month}/{period.year}
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">Status: {period.status}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Diproses {period.processed_at ? formatDateTimeID(period.processed_at) : "-"}
-              </p>
-            </div>
-          ))}
         </CardContent>
       </Card>
     </div>
   );
 }
-

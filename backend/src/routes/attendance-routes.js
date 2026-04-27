@@ -12,17 +12,13 @@ import { validateBody } from "../middleware/validate-body.js";
 
 const router = new Hono();
 
-const coordinatesSchema = z.object({
-  qr_token: z.string().uuid().optional().or(z.literal("")),
-  latitude: z.number(),
-  longitude: z.number(),
-});
+const attendanceActionSchema = z.object({}).passthrough();
 
 router.get("/sessions/active", activeSessions);
 router.post("/sessions", createSession);
 router.get("/logs", attendanceLogs);
-router.post("/check-in", validateBody(coordinatesSchema), checkIn);
-router.post("/check-out", validateBody(coordinatesSchema.omit({ qr_token: true })), checkOut);
+router.post("/check-in", checkIn);
+router.post("/check-out", checkOut);
 router.post(
   "/permission",
   validateBody(

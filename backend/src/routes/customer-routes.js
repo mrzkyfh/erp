@@ -13,7 +13,6 @@ const router = new Hono();
 const schema = z.object({
   name: z.string().min(2, "Nama konsumen wajib diisi."),
   phone: z.string().min(8, "Nomor HP wajib diisi."),
-  email: z.string().email("Email tidak valid.").or(z.literal("")).optional().nullable(),
   address: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
 });

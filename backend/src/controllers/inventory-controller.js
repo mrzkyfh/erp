@@ -1,10 +1,15 @@
+import fs from "fs";
+import path from "path";
 import {
   createInventoryItem,
   createPurchase,
   createStockUsage,
   createSupplier,
   getInventoryOverview,
+  createMaterialExpense,
+  getLatestItemPrice,
 } from "../services/inventory-service.js";
+
 import { getEmployeeByProfileId } from "../services/employee-service.js";
 
 export async function inventoryOverview(c) {
@@ -23,16 +28,36 @@ export async function storeSupplier(c) {
 }
 
 export async function storePurchase(c) {
+  const payload = c.get("validatedBody");
   const profile = c.get("profile");
-  const data = await createPurchase(c.get("validatedBody"), profile.id);
+  
+  const logMessage = `[${new Date().toISOString()}] [Controller] Store Purchase: ${JSON.stringify(payload)} by ${profile.id}\n`;
+  fs.appendFileSync(path.resolve(process.cwd(), "backend-debug.log"), logMessage);
+
+  const data = await createPurchase(payload, profile.id);
   return c.json({ data }, 201);
 }
+
 
 export async function storeUsage(c) {
   const profile = c.get("profile");
   const employee = await getEmployeeByProfileId(profile.id).catch(() => null);
   const data = await createStockUsage(c.get("validatedBody"), profile.id, employee?.id || null);
   return c.json({ data }, 201);
+}
+
+
+
+export async function storeMaterialExpense(c) {
+  const profile = c.get("profile");
+  const data = await createMaterialExpense(c.get("validatedBody"), profile.id);
+  return c.json({ data }, 201);
+}
+
+export async function getLatestPrice(c) {
+  const itemId = c.req.param("itemId");
+  const price = await getLatestItemPrice(itemId);
+  return c.json({ data: { price } });
 }
 
 

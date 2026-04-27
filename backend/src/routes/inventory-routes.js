@@ -6,7 +6,10 @@ import {
   storePurchase,
   storeSupplier,
   storeUsage,
+  storeMaterialExpense,
+  getLatestPrice,
 } from "../controllers/inventory-controller.js";
+
 import { validateBody } from "../middleware/validate-body.js";
 import { requireRoles } from "../middleware/auth-middleware.js";
 
@@ -14,11 +17,13 @@ const router = new Hono();
 
 // Karyawan bisa lihat overview
 router.get("/overview", inventoryOverview);
+router.get("/latest-price/:itemId", getLatestPrice);
+
 
 // Hanya owner/manager bisa create item, supplier, purchase
 router.post(
   "/items",
-  requireRoles("owner", "manager"),
+  requireRoles("owner"),
   validateBody(
     z.object({
       name: z.string().min(2, "Nama item wajib diisi."),
@@ -33,12 +38,11 @@ router.post(
 );
 router.post(
   "/suppliers",
-  requireRoles("owner", "manager"),
+  requireRoles("owner"),
   validateBody(
     z.object({
       name: z.string().min(2, "Nama supplier wajib diisi."),
       contact_phone: z.string().optional().nullable(),
-      email: z.string().email("Email supplier tidak valid.").or(z.literal("")).optional().nullable(),
       address: z.string().optional().nullable(),
     }),
   ),
@@ -46,7 +50,7 @@ router.post(
 );
 router.post(
   "/purchases",
-  requireRoles("owner", "manager"),
+  requireRoles("owner"),
   validateBody(
     z.object({
       supplier_id: z.string().uuid(),
@@ -71,6 +75,23 @@ router.post(
     }),
   ),
   storeUsage,
+);
+
+// Owner/Manager bisa record material expenses
+router.post(
+  "/material-expenses",
+  requireRoles("owner"),
+  validateBody(
+    z.object({
+      item_id: z.string().uuid(),
+      qty: z.number().positive(),
+      unit_price: z.number().nonnegative(),
+      total_expense: z.number().nonnegative(),
+      reason: z.string().optional().nullable(),
+      date: z.string().min(1, "Tanggal wajib diisi."),
+    }),
+  ),
+  storeMaterialExpense,
 );
 
 export { router as inventoryRoutes };

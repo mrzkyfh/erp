@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { QrCode, RefreshCcw } from "lucide-react";
+import { QrCode } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,6 @@ export function AttendancePage() {
   const [logs, setLogs] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [qrToken, setQrToken] = useState("");
-  const [coordinates, setCoordinates] = useState(null);
   const [busy, setBusy] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -41,26 +40,6 @@ export function AttendancePage() {
     loadData();
   });
 
-  const captureLocation = async () =>
-    new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error("Browser tidak mendukung GPS."));
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const nextCoordinates = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };
-          setCoordinates(nextCoordinates);
-          resolve(nextCoordinates);
-        },
-        () => reject(new Error("Izin lokasi diperlukan untuk absensi.")),
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
-      );
-    });
 
   const createSession = async () => {
     setBusy(true);
@@ -79,13 +58,14 @@ export function AttendancePage() {
   const runAttendance = async (type) => {
     setBusy(true);
     try {
-      const location = coordinates ?? (await captureLocation());
-      await api.post(`/attendance/${type}`, {
-        qr_token: qrToken || sessions[0]?.qr_token,
-        latitude: location.latitude,
-        longitude: location.longitude,
-      });
+      const payload = {};
+      if (type === "check-in") {
+        payload.qr_token = qrToken || (sessions && sessions.length > 0 ? sessions[0].qr_token : null);
+      }
+      
+      await api.post(`/attendance/${type}`, payload);
       toast.success(type === "check-in" ? "Check-in berhasil." : "Check-out berhasil.");
+      setQrToken("");
       await loadData();
     } catch (error) {
       toast.error(error.message);
@@ -93,6 +73,7 @@ export function AttendancePage() {
       setBusy(false);
     }
   };
+
 
   const submitPermission = async () => {
     setBusy(true);
@@ -116,40 +97,51 @@ export function AttendancePage() {
         <Card>
           <CardHeader>
             <div>
-              <CardTitle>Absensi Berbasis QR + GPS</CardTitle>
+              <CardTitle>Absensi Berbasis QR</CardTitle>
               <CardDescription>
-                Sesi QR aktif berlaku 24 jam, dan lokasi akan divalidasi terhadap radius bisnis.
+                Sesi QR aktif berlaku 24 jam. Karyawan dapat absen dengan scan QR atau token.
               </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="space-y-5">
-            {["owner", "manager"].includes(profile?.role) ? (
-              <div className="rounded-3xl border border-border bg-white p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-medium">QR Absensi Harian</p>
-                    <p className="text-sm text-muted-foreground">
-                      Buat sesi absensi baru untuk hari ini jika belum ada.
-                    </p>
-                  </div>
+            {/* QR Code Display - Visible to all roles */}
+            <div className="rounded-3xl border border-border bg-white p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-medium">QR Absensi Harian</p>
+                  <p className="text-sm text-muted-foreground">
+                    {profile?.role === "owner"
+                      ? "Buat sesi absensi baru untuk hari ini jika belum ada."
+                      : "Scan QR code untuk absensi atau gunakan token manual."}
+                  </p>
+                </div>
+                {profile?.role === "owner" && (
                   <Button onClick={createSession} disabled={busy}>
                     <QrCode className="h-4 w-4" />
                     Buat QR
                   </Button>
-                </div>
-                {sessions[0] ? (
-                  <div className="mt-4 flex flex-col items-center gap-3 rounded-3xl bg-muted p-4">
-                    <QRCodeSVG value={sessions[0].qr_token} size={200} />
-                    <p className="text-center text-sm">
-                      Token: <span className="font-semibold">{sessions[0].qr_token}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Berlaku sampai {formatDateTimeID(sessions[0].expires_at)}
-                    </p>
-                  </div>
-                ) : null}
+                )}
               </div>
-            ) : null}
+              {sessions[0] ? (
+                <div className="mt-4 flex flex-col items-center gap-3 rounded-3xl bg-muted p-4">
+                  <QRCodeSVG value={sessions[0].qr_token} size={200} />
+                  <p className="text-center text-sm">
+                    Token: <span className="font-semibold">{sessions[0].qr_token}</span>
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Berlaku sampai {formatDateTimeID(sessions[0].expires_at)}
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-3xl bg-muted p-4 text-center">
+                  <p className="text-sm text-muted-foreground">
+                    {profile?.role === "owner"
+                      ? "Belum ada sesi QR. Klik 'Buat QR' untuk membuat sesi baru."
+                      : "Menunggu manager membuat sesi QR untuk hari ini."}
+                  </p>
+                </div>
+              )}
+            </div>
 
             <div className="space-y-3 rounded-3xl border border-border bg-white p-4">
               <div className="flex items-center justify-between gap-3">
@@ -157,21 +149,12 @@ export function AttendancePage() {
                   <p className="font-medium">Absensi Mandiri</p>
                   <p className="text-sm text-muted-foreground">Isi token QR jika scan belum terhubung langsung.</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={() => captureLocation()}>
-                  <RefreshCcw className="h-4 w-4" />
-                  Ambil GPS
-                </Button>
               </div>
               <Input
                 placeholder="Tempel token QR di sini"
                 value={qrToken}
                 onChange={(e) => setQrToken(e.target.value)}
               />
-              <div className="rounded-2xl bg-muted p-3 text-sm">
-                {coordinates
-                  ? `Lokasi siap: ${coordinates.latitude.toFixed(5)}, ${coordinates.longitude.toFixed(5)}`
-                  : "Lokasi belum diambil."}
-              </div>
               <div className="flex flex-wrap gap-3">
                 <Button onClick={() => runAttendance("check-in")} disabled={busy}>
                   Check-in
@@ -202,7 +185,6 @@ export function AttendancePage() {
                   <TH>Masuk</TH>
                   <TH>Keluar</TH>
                   <TH>Status</TH>
-                  <TH>Jarak</TH>
                 </TR>
               </THead>
               <TBody>
@@ -214,7 +196,6 @@ export function AttendancePage() {
                     <TD>
                       <Badge tone={getStatusBadgeTone(log.status)}>{log.status}</Badge>
                     </TD>
-                    <TD>{Math.round(log.distance_meters || 0)} m</TD>
                   </TR>
                 ))}
               </TBody>

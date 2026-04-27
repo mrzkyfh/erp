@@ -6,12 +6,14 @@ import { AttendancePage } from "@/pages/AttendancePage";
 import { CustomersPage } from "@/pages/CustomersPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { EmployeesPage } from "@/pages/EmployeesPage";
-import { FinesPage } from "@/pages/FinesPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { PayrollPage } from "@/pages/PayrollPage";
+import { SalarySettingsPage } from "@/pages/SalarySettingsPage";
 import { ProfilePage } from "@/pages/ProfilePage";
+import { SettingsPage } from "@/pages/SettingsPage";
+import { AddItemPage, AddSupplierPage, PurchaseStockPage, UseStockPage, MaterialExpensePage } from "@/pages/inventory";
 
 export function AppRouter() {
   const session = useAuthStore((state) => state.session);
@@ -37,20 +39,14 @@ export function AppRouter() {
             </AppShell>
           }
         />
-        <Route element={<ProtectedRoute allowedRoles={["owner", "manager"]} />}>
+        
+        {/* Routes for Owner & Manager */}
+        <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>
           <Route
             path="/karyawan"
             element={
               <AppShell>
                 <EmployeesPage />
-              </AppShell>
-            }
-          />
-          <Route
-            path="/denda"
-            element={
-              <AppShell>
-                <FinesPage />
               </AppShell>
             }
           />
@@ -63,14 +59,56 @@ export function AppRouter() {
             }
           />
           <Route
-            path="/inventori"
+            path="/inventori/tambah-item"
             element={
               <AppShell>
-                <InventoryPage />
+                <AddItemPage />
+              </AppShell>
+            }
+          />
+          <Route
+            path="/inventori/tambah-supplier"
+            element={
+              <AppShell>
+                <AddSupplierPage />
+              </AppShell>
+            }
+          />
+          <Route
+            path="/inventori/pembelian"
+            element={
+              <AppShell>
+                <PurchaseStockPage />
+              </AppShell>
+            }
+          />
+          <Route
+            path="/inventori/pengeluaran"
+            element={
+              <AppShell>
+                <MaterialExpensePage />
+              </AppShell>
+            }
+          />
+          <Route
+            path="/penggajian/pengaturan"
+            element={
+              <AppShell>
+                <SalarySettingsPage />
+              </AppShell>
+            }
+          />
+          <Route
+            path="/pengaturan"
+            element={
+              <AppShell>
+                <SettingsPage />
               </AppShell>
             }
           />
         </Route>
+
+        {/* Routes for All Roles */}
         <Route
           path="/absensi"
           element={
@@ -87,10 +125,25 @@ export function AppRouter() {
             </AppShell>
           }
         />
+        <Route
+          path="/inventori"
+          element={
+            <AppShell>
+              <InventoryPage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/inventori/penggunaan"
+          element={
+            <AppShell>
+              <UseStockPage />
+            </AppShell>
+          }
+        />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
-

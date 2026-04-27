@@ -3,9 +3,10 @@ import { z } from "zod";
 import {
   editEmployee,
   getEmployees,
-  getJobdesks,
   patchEmployeeStatus,
   storeEmployee,
+  getSalaryConfig,
+  saveSalaryConfig,
 } from "../controllers/employee-controller.js";
 import { validateBody } from "../middleware/validate-body.js";
 
@@ -15,21 +16,19 @@ const employeeSchema = z.object({
   email: z.string().email("Email tidak valid."),
   password: z.string().min(6, "Password minimal 6 karakter.").optional().or(z.literal("")),
   full_name: z.string().min(2, "Nama lengkap wajib diisi."),
-  nik: z.string().optional().nullable(),
   phone: z.string().optional().nullable(),
+
   address: z.string().optional().nullable(),
-  role: z.enum(["owner", "manager", "karyawan"]),
+  role: z.enum(["owner", "karyawan"]),
   join_date: z.string().min(1, "Tanggal masuk wajib diisi."),
-  salary_type: z.enum(["harian", "bulanan"]),
-  base_salary: z.number().nonnegative(),
-  allowance: z.number().nonnegative(),
+  salary_type: z.enum(["harian", "bulanan"]).optional(),
+  base_salary: z.number().nonnegative().optional(),
+  allowance: z.number().nonnegative().optional(),
   default_deduction: z.number().nonnegative().optional(),
   status: z.enum(["aktif", "nonaktif"]),
-  jobdesk_ids: z.array(z.string().uuid()).optional(),
 });
 
 router.get("/", getEmployees);
-router.get("/jobdesks", getJobdesks);
 router.post("/", validateBody(employeeSchema), storeEmployee);
 router.put("/:id", validateBody(employeeSchema), editEmployee);
 router.patch(
@@ -38,6 +37,7 @@ router.patch(
   patchEmployeeStatus,
 );
 
+router.get("/:id/salary-config", getSalaryConfig);
+router.post("/:id/salary-config", saveSalaryConfig);
+
 export { router as employeeRoutes };
-
-

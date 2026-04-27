@@ -111,8 +111,10 @@ export async function getDashboardSummary(profile) {
         : []),
       {
         title: "Payroll siap diproses",
-        description: "Lakukan pengecekan denda dan absensi sebelum konfirmasi pembayaran.",
+        description: "Lakukan pengecekan absensi sebelum konfirmasi pembayaran.",
       },
+
+
     ],
   };
 }

@@ -28,7 +28,6 @@ export function formatDateTimeID(value) {
 export function getRoleLabel(role) {
   return {
     owner: "Owner",
-    manager: "Manager",
     karyawan: "Karyawan",
   }[role] ?? role;
 }

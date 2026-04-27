@@ -2,6 +2,7 @@ import {
   BadgeDollarSign,
   Boxes,
   LayoutDashboard,
+  Settings,
   ShieldCheck,
   SquareUserRound,
   Users,
@@ -13,22 +14,22 @@ export const navigation = [
     label: "Dashboard",
     path: "/",
     icon: LayoutDashboard,
-    roles: ["owner", "manager", "karyawan"],
+    roles: ["owner", "karyawan"],
   },
   {
     label: "Karyawan",
     icon: Users,
-    roles: ["owner", "manager"],
+    roles: ["owner"],
     children: [
       {
         label: "Data Karyawan",
         path: "/karyawan",
-        roles: ["owner", "manager"],
+        roles: ["owner"],
       },
       {
         label: "Absensi",
         path: "/absensi",
-        roles: ["owner", "manager"],
+        roles: ["owner"],
       },
     ],
   },
@@ -38,29 +39,30 @@ export const navigation = [
     icon: ShieldCheck,
     roles: ["karyawan"],
   },
-  {
-    label: "Denda",
-    path: "/denda",
-    icon: BadgeDollarSign,
-    roles: ["owner", "manager"],
-  },
+
   {
     label: "Penggajian",
     path: "/penggajian",
     icon: SquareUserRound,
-    roles: ["owner", "manager", "karyawan"],
+    roles: ["owner", "karyawan"],
   },
   {
     label: "Konsumen",
     path: "/konsumen",
     icon: UserSquare2,
-    roles: ["owner", "manager"],
+    roles: ["owner"],
   },
   {
     label: "Inventori",
     path: "/inventori",
     icon: Boxes,
-    roles: ["owner", "manager", "karyawan"],
+    roles: ["owner", "karyawan"],
+  },
+  {
+    label: "Pengaturan",
+    path: "/pengaturan",
+    icon: Settings,
+    roles: ["owner"],
   },
 ];
 
