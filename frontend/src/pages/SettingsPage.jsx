@@ -8,10 +8,7 @@ import { FormField } from "@/components/forms/FormField";
 import { api } from "@/lib/api";
 
 export function SettingsPage() {
-  const [settings, setSettings] = useState({
-    work_start_time: "08:00:00",
-    tolerance_minutes: 15,
-  });
+  const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -27,12 +24,16 @@ export function SettingsPage() {
         const data = response.data.data;
         setSettings({
           work_start_time: data.work_start_time || "08:00:00",
-          tolerance_minutes: data.tolerance_minutes || 15,
+          tolerance_minutes: data.tolerance_minutes !== undefined ? data.tolerance_minutes : 15,
         });
       }
     } catch (error) {
       console.error("Error loading settings:", error);
-      // Silently use default values, no error toast
+      // Use default values if error
+      setSettings({
+        work_start_time: "08:00:00",
+        tolerance_minutes: 15,
+      });
     } finally {
       setLoading(false);
     }
@@ -69,6 +70,9 @@ export function SettingsPage() {
 
       await api.put("/settings", payload);
       toast.success("Pengaturan jam kerja berhasil disimpan.");
+      
+      // Reload settings to ensure we have the latest data
+      await loadSettings();
     } catch (error) {
       console.error("Error saving settings:", error);
       toast.error(error.message || "Gagal menyimpan pengaturan");
@@ -77,10 +81,10 @@ export function SettingsPage() {
     }
   };
 
-  if (loading) {
+  if (loading || !settings) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-muted-foreground">Memuat pengaturan...</p>
+        <p className="text-slate-500">Memuat pengaturan...</p>
       </div>
     );
   }
@@ -88,10 +92,10 @@ export function SettingsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Clock className="h-8 w-8" />
+        <Clock className="h-8 w-8 text-slate-600" />
         <div>
-          <h1 className="text-2xl font-bold">Pengaturan Jam Kerja</h1>
-          <p className="text-sm text-muted-foreground">Atur jam mulai kerja dan toleransi keterlambatan.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Pengaturan Jam Kerja</h1>
+          <p className="text-sm text-slate-600">Atur jam mulai kerja dan toleransi keterlambatan.</p>
         </div>
       </div>
 

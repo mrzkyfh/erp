@@ -54,9 +54,6 @@ export function LoginPage() {
           </div>
           <div>
             <CardTitle className="mt-4 text-2xl md:text-3xl">Rumah Kue Nuraisah</CardTitle>
-            <CardDescription className="mt-2">
-              Masuk dengan email dan password Anda
-            </CardDescription>
           </div>
         </CardHeader>
         <CardContent>
