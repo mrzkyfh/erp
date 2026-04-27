@@ -23,7 +23,7 @@ router.get("/overview", inventoryOverview);
 router.get("/latest-price/:itemId", getLatestPrice);
 
 
-// Hanya owner/manager bisa create item, supplier, purchase
+// Hanya owner bisa create/delete item dan supplier
 router.post(
   "/items",
   requireRoles("owner"),
@@ -56,7 +56,6 @@ router.post(
 router.delete("/suppliers/:id", requireRoles("owner"), removeSupplier);
 router.post(
   "/purchases",
-  requireRoles("owner"),
   validateBody(
     z.object({
       supplier_id: z.string().uuid(),
@@ -84,10 +83,9 @@ router.post(
 );
 router.delete("/usages/:id", requireRoles("owner"), removeUsage);
 
-// Owner/Manager bisa record material expenses
+// Semua role bisa record material expenses
 router.post(
   "/material-expenses",
-  requireRoles("owner"),
   validateBody(
     z.object({
       item_id: z.string().uuid(),
