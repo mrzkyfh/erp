@@ -44,41 +44,67 @@ export function InventoryPage() {
 
   return (
     <div className="space-y-6">
+      {/* Quick Actions for Owner/Manager - Mobile Optimized */}
+      {!isKaryawan && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Kelola Inventori</CardTitle>
+            <CardDescription>Tambah item, supplier, atau catat transaksi.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+              <Button 
+                size="sm" 
+                onClick={() => navigate("/inventori/tambah-item")}
+                className="flex-col h-auto py-3 gap-1"
+              >
+                <Plus className="h-5 w-5" />
+                <span className="text-xs">Item</span>
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={() => navigate("/inventori/tambah-supplier")}
+                className="flex-col h-auto py-3 gap-1"
+              >
+                <Plus className="h-5 w-5" />
+                <span className="text-xs">Supplier</span>
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={() => navigate("/inventori/pembelian")}
+                className="flex-col h-auto py-3 gap-1"
+              >
+                <Plus className="h-5 w-5" />
+                <span className="text-xs">Pembelian</span>
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={() => navigate("/inventori/penggunaan")}
+                className="flex-col h-auto py-3 gap-1"
+              >
+                <Plus className="h-5 w-5" />
+                <span className="text-xs">Penggunaan</span>
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={() => navigate("/inventori/pengeluaran")}
+                className="flex-col h-auto py-3 gap-1 col-span-2 sm:col-span-1"
+              >
+                <Plus className="h-5 w-5" />
+                <span className="text-xs">Pengeluaran</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stock List - Visible for all roles - APPEARS FIRST */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>Daftar Stock</CardTitle>
-              <CardDescription>
-                {searchQuery ? `Hasil pencarian: "${searchQuery}"` : "Stok saat ini dan status ketersediaan bahan."}
-              </CardDescription>
-            </div>
-            {!isKaryawan && (
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => navigate("/inventori/tambah-item")}>
-                  <Plus className="h-4 w-4" />
-                  Item
-                </Button>
-                <Button size="sm" onClick={() => navigate("/inventori/tambah-supplier")}>
-                  <Plus className="h-4 w-4" />
-                  Supplier
-                </Button>
-                <Button size="sm" onClick={() => navigate("/inventori/pembelian")}>
-                  <Plus className="h-4 w-4" />
-                  Pembelian
-                </Button>
-                <Button size="sm" onClick={() => navigate("/inventori/penggunaan")}>
-                  <Plus className="h-4 w-4" />
-                  Penggunaan
-                </Button>
-                <Button size="sm" onClick={() => navigate("/inventori/pengeluaran")}>
-                  <Plus className="h-4 w-4" />
-                  Pengeluaran
-                </Button>
-              </div>
-            )}
-          </div>
+          <CardTitle>Daftar Stock</CardTitle>
+          <CardDescription>
+            {searchQuery ? `Hasil pencarian: "${searchQuery}"` : "Stok saat ini dan status ketersediaan bahan."}
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Search Bar */}
@@ -135,19 +161,25 @@ export function InventoryPage() {
         </CardContent>
       </Card>
 
-      {/* Action Buttons - Visible for all roles to record usage */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Aksi Cepat</CardTitle>
-          <CardDescription>Catat penggunaan stok bahan baku.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button onClick={() => navigate("/inventori/penggunaan")} className="w-full" variant="outline">
-            <Plus className="h-4 w-4" />
-            Catat Penggunaan Stok
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Action Buttons - Visible for Karyawan to record usage */}
+      {isKaryawan && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Aksi Cepat</CardTitle>
+            <CardDescription>Catat penggunaan stok bahan baku.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => navigate("/inventori/penggunaan")} 
+              className="w-full flex-col h-auto py-4 gap-2" 
+              variant="outline"
+            >
+              <Plus className="h-6 w-6" />
+              <span>Catat Penggunaan Stok</span>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* History - Visible for all roles */}
       <Card>
@@ -155,38 +187,38 @@ export function InventoryPage() {
           <CardTitle>Riwayat Transaksi</CardTitle>
           <CardDescription>Histori pembelian dan penggunaan stok terbaru.</CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-6 xl:grid-cols-2">
+        <CardContent className="grid gap-6 md:grid-cols-2">
           <div>
-            <p className="mb-3 font-medium">Pembelian Terbaru</p>
-            <div className="space-y-3">
+            <p className="mb-3 text-sm font-semibold text-slate-900">Pembelian Terbaru</p>
+            <div className="space-y-2">
               {overview.purchases.length > 0 ? (
                 overview.purchases.map((purchase) => (
-                  <div key={purchase.id} className="rounded-2xl border border-border bg-white p-4">
-                    <p className="font-medium">{purchase.supplier?.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div key={purchase.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                    <p className="font-medium text-slate-900">{purchase.supplier?.name}</p>
+                    <p className="text-xs text-slate-500 mt-1">
                       {formatDateID(purchase.date)} • {formatRupiah(purchase.total_amount)}
                     </p>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground">Tidak ada pembelian</p>
+                <p className="text-sm text-slate-500 py-4 text-center">Tidak ada pembelian</p>
               )}
             </div>
           </div>
           <div>
-            <p className="mb-3 font-medium">Penggunaan Terbaru</p>
-            <div className="space-y-3">
+            <p className="mb-3 text-sm font-semibold text-slate-900">Penggunaan Terbaru</p>
+            <div className="space-y-2">
               {overview.usages.length > 0 ? (
                 overview.usages.map((usage) => (
-                  <div key={usage.id} className="rounded-2xl border border-border bg-white p-4">
-                    <p className="font-medium">{usage.item?.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                  <div key={usage.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                    <p className="font-medium text-slate-900">{usage.item?.name}</p>
+                    <p className="text-xs text-slate-500 mt-1">
                       {usage.qty} {usage.item?.unit} • {usage.reason}
                     </p>
                   </div>
                 ))
               ) : (
-                <p className="text-sm text-muted-foreground">Tidak ada penggunaan</p>
+                <p className="text-sm text-slate-500 py-4 text-center">Tidak ada penggunaan</p>
               )}
             </div>
           </div>
