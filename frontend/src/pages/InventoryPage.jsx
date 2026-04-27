@@ -44,59 +44,68 @@ export function InventoryPage() {
 
   return (
     <div className="space-y-6">
-      {/* Quick Actions for Owner/Manager - Mobile Optimized */}
-      {!isKaryawan && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Kelola Inventori</CardTitle>
-            <CardDescription>Tambah item, supplier, atau catat transaksi.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
-              <Button 
-                size="sm" 
-                onClick={() => navigate("/inventori/tambah-item")}
-                className="flex-col h-auto py-3 gap-1"
-              >
-                <Plus className="h-5 w-5" />
-                <span className="text-xs">Item</span>
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={() => navigate("/inventori/tambah-supplier")}
-                className="flex-col h-auto py-3 gap-1"
-              >
-                <Plus className="h-5 w-5" />
-                <span className="text-xs">Supplier</span>
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={() => navigate("/inventori/pembelian")}
-                className="flex-col h-auto py-3 gap-1"
-              >
-                <Plus className="h-5 w-5" />
-                <span className="text-xs">Pembelian</span>
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={() => navigate("/inventori/penggunaan")}
-                className="flex-col h-auto py-3 gap-1"
-              >
-                <Plus className="h-5 w-5" />
-                <span className="text-xs">Penggunaan</span>
-              </Button>
-              <Button 
-                size="sm" 
-                onClick={() => navigate("/inventori/pengeluaran")}
-                className="flex-col h-auto py-3 gap-1 col-span-2 sm:col-span-1"
-              >
-                <Plus className="h-5 w-5" />
-                <span className="text-xs">Pengeluaran</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Quick Actions - Mobile Optimized */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Kelola Inventori</CardTitle>
+          <CardDescription>
+            {isKaryawan 
+              ? "Catat transaksi pembelian, penggunaan, dan pengeluaran bahan."
+              : "Tambah item, supplier, atau catat transaksi."}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
+            {/* Owner only: Item & Supplier */}
+            {!isKaryawan && (
+              <>
+                <Button 
+                  size="sm" 
+                  onClick={() => navigate("/inventori/tambah-item")}
+                  className="flex-col h-auto py-3 gap-1"
+                >
+                  <Plus className="h-5 w-5" />
+                  <span className="text-xs">Item</span>
+                </Button>
+                <Button 
+                  size="sm" 
+                  onClick={() => navigate("/inventori/tambah-supplier")}
+                  className="flex-col h-auto py-3 gap-1"
+                >
+                  <Plus className="h-5 w-5" />
+                  <span className="text-xs">Supplier</span>
+                </Button>
+              </>
+            )}
+            
+            {/* All roles: Pembelian, Penggunaan, Pengeluaran */}
+            <Button 
+              size="sm" 
+              onClick={() => navigate("/inventori/pembelian")}
+              className="flex-col h-auto py-3 gap-1"
+            >
+              <Plus className="h-5 w-5" />
+              <span className="text-xs">Pembelian</span>
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={() => navigate("/inventori/penggunaan")}
+              className="flex-col h-auto py-3 gap-1"
+            >
+              <Plus className="h-5 w-5" />
+              <span className="text-xs">Penggunaan</span>
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={() => navigate("/inventori/pengeluaran")}
+              className={`flex-col h-auto py-3 gap-1 ${isKaryawan ? '' : 'col-span-2 sm:col-span-1'}`}
+            >
+              <Plus className="h-5 w-5" />
+              <span className="text-xs">Pengeluaran</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Stock List - Visible for all roles - APPEARS FIRST */}
       <Card>
@@ -160,26 +169,6 @@ export function InventoryPage() {
           </Table>
         </CardContent>
       </Card>
-
-      {/* Action Buttons - Visible for Karyawan to record usage */}
-      {isKaryawan && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Aksi Cepat</CardTitle>
-            <CardDescription>Catat penggunaan stok bahan baku.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={() => navigate("/inventori/penggunaan")} 
-              className="w-full flex-col h-auto py-4 gap-2" 
-              variant="outline"
-            >
-              <Plus className="h-6 w-6" />
-              <span>Catat Penggunaan Stok</span>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
 
       {/* History - Visible for all roles */}
       <Card>
