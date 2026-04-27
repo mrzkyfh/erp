@@ -11,6 +11,7 @@ export function SettingsPage() {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     loadSettings();
@@ -19,21 +20,30 @@ export function SettingsPage() {
   const loadSettings = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await api.get("/settings");
-      if (response.data && response.data.data) {
-        const data = response.data.data;
+      if (response && response.data) {
+        const data = response.data;
         setSettings({
           work_start_time: data.work_start_time || "08:00:00",
           tolerance_minutes: data.tolerance_minutes !== undefined ? data.tolerance_minutes : 15,
         });
+      } else {
+        // Use default values if no data
+        setSettings({
+          work_start_time: "08:00:00",
+          tolerance_minutes: 15,
+        });
       }
     } catch (error) {
       console.error("Error loading settings:", error);
+      setError(error.message || "Gagal memuat pengaturan");
       // Use default values if error
       setSettings({
         work_start_time: "08:00:00",
         tolerance_minutes: 15,
       });
+      toast.error("Gagal memuat pengaturan, menggunakan nilai default");
     } finally {
       setLoading(false);
     }
@@ -52,7 +62,7 @@ export function SettingsPage() {
       let currentData = {};
       try {
         const currentResponse = await api.get("/settings");
-        currentData = currentResponse.data?.data || {};
+        currentData = currentResponse.data || {};
       } catch (error) {
         console.error("Error loading current settings:", error);
         // Use defaults if can't load current settings
@@ -60,7 +70,7 @@ export function SettingsPage() {
 
       // Merge with new work time settings, ensure all required fields exist
       const payload = {
-        business_name: currentData.business_name || "Bisnis Anda",
+        business_name: currentData.business_name || "Rumah Kue Nuraisah",
         latitude: currentData.latitude !== undefined ? currentData.latitude : 0,
         longitude: currentData.longitude !== undefined ? currentData.longitude : 0,
         attendance_radius_meters: currentData.attendance_radius_meters || 100,
@@ -81,10 +91,19 @@ export function SettingsPage() {
     }
   };
 
-  if (loading || !settings) {
+  if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
         <p className="text-slate-500">Memuat pengaturan...</p>
+      </div>
+    );
+  }
+
+  if (error && !settings) {
+    return (
+      <div className="flex h-64 items-center justify-center flex-col gap-4">
+        <p className="text-red-600">❌ {error}</p>
+        <Button onClick={loadSettings}>Coba Lagi</Button>
       </div>
     );
   }
