@@ -77,34 +77,27 @@ export function InventoryPage() {
         <CardHeader>
           <CardTitle>Kelola Inventori</CardTitle>
           <CardDescription>
-            {isKaryawan 
-              ? "Catat transaksi pembelian, penggunaan, dan pengeluaran bahan."
-              : "Tambah item, supplier, atau catat transaksi."}
+            Tambah item, supplier, atau catat transaksi pembelian, penggunaan, dan pengeluaran bahan.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5">
-            {/* Owner only: Item & Supplier */}
-            {!isKaryawan && (
-              <>
-                <Button 
-                  size="sm" 
-                  onClick={() => navigate("/inventori/tambah-item")}
-                  className="flex-col h-auto py-3 gap-1"
-                >
-                  <Plus className="h-5 w-5" />
-                  <span className="text-xs">Item</span>
-                </Button>
-                <Button 
-                  size="sm" 
-                  onClick={() => navigate("/inventori/tambah-supplier")}
-                  className="flex-col h-auto py-3 gap-1"
-                >
-                  <Plus className="h-5 w-5" />
-                  <span className="text-xs">Supplier</span>
-                </Button>
-              </>
-            )}
+            <Button 
+              size="sm" 
+              onClick={() => navigate("/inventori/tambah-item")}
+              className="flex-col h-auto py-3 gap-1"
+            >
+              <Plus className="h-5 w-5" />
+              <span className="text-xs">Item</span>
+            </Button>
+            <Button 
+              size="sm" 
+              onClick={() => navigate("/inventori/tambah-supplier")}
+              className="flex-col h-auto py-3 gap-1"
+            >
+              <Plus className="h-5 w-5" />
+              <span className="text-xs">Supplier</span>
+            </Button>
             
             {/* All roles: Pembelian, Penggunaan, Pengeluaran */}
             <Button 
@@ -126,7 +119,7 @@ export function InventoryPage() {
             <Button 
               size="sm" 
               onClick={() => navigate("/inventori/pengeluaran")}
-              className={`flex-col h-auto py-3 gap-1 ${isKaryawan ? '' : 'col-span-2 sm:col-span-1'}`}
+              className="flex-col h-auto py-3 gap-1"
             >
               <Plus className="h-5 w-5" />
               <span className="text-xs">Pengeluaran</span>

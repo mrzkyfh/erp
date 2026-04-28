@@ -4,7 +4,7 @@ import { authRoutes } from "./auth-routes.js";
 import { customerRoutes } from "./customer-routes.js";
 import { dashboardRoutes } from "./dashboard-routes.js";
 import { employeeRoutes } from "./employee-routes.js";
-
+import overtimeRoutes from "./overtime-routes.js";
 import { inventoryRoutes } from "./inventory-routes.js";
 import { payrollRoutes } from "./payroll-routes.js";
 import { salaryTypeRoutes } from "./salary-type-routes.js";
@@ -42,7 +42,7 @@ router.route("/auth", authRoutes);
 router.route("/dashboard", dashboardRoutes);
 router.route("/employees", employeeRoutes); // Roles will be handled inside sub-router or middleware
 router.route("/attendance", attendanceRoutes);
-
+router.route("/overtime", overtimeRoutes);
 router.route("/payroll", payrollRoutes);
 router.route("/salary-types", salaryTypeRoutes);
 router.route("/customers", customerRoutes);

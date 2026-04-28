@@ -9,6 +9,7 @@ import { EmployeesPage } from "@/pages/EmployeesPage";
 import { InventoryPage } from "@/pages/InventoryPage";
 import { LoginPage } from "@/pages/LoginPage";
 import { NotFoundPage } from "@/pages/NotFoundPage";
+import { OvertimePage } from "@/pages/OvertimePage";
 import { PayrollPage } from "@/pages/PayrollPage";
 import { SalarySettingsPage } from "@/pages/SalarySettingsPage";
 import { ProfilePage } from "@/pages/ProfilePage";
@@ -40,7 +41,7 @@ export function AppRouter() {
           }
         />
         
-        {/* Routes for Owner & Manager */}
+        {/* Routes for Owner only */}
         <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>
           <Route
             path="/karyawan"
@@ -58,6 +59,26 @@ export function AppRouter() {
               </AppShell>
             }
           />
+          <Route
+            path="/penggajian/pengaturan"
+            element={
+              <AppShell>
+                <SalarySettingsPage />
+              </AppShell>
+            }
+          />
+          <Route
+            path="/pengaturan"
+            element={
+              <AppShell>
+                <SettingsPage />
+              </AppShell>
+            }
+          />
+        </Route>
+
+        {/* Routes for Owner & Karyawan */}
+        <Route element={<ProtectedRoute allowedRoles={["owner", "karyawan"]} />}>
           <Route
             path="/inventori/tambah-item"
             element={
@@ -90,22 +111,6 @@ export function AppRouter() {
               </AppShell>
             }
           />
-          <Route
-            path="/penggajian/pengaturan"
-            element={
-              <AppShell>
-                <SalarySettingsPage />
-              </AppShell>
-            }
-          />
-          <Route
-            path="/pengaturan"
-            element={
-              <AppShell>
-                <SettingsPage />
-              </AppShell>
-            }
-          />
         </Route>
 
         {/* Routes for All Roles */}
@@ -114,6 +119,14 @@ export function AppRouter() {
           element={
             <AppShell>
               <AttendancePage />
+            </AppShell>
+          }
+        />
+        <Route
+          path="/lembur"
+          element={
+            <AppShell>
+              <OvertimePage />
             </AppShell>
           }
         />

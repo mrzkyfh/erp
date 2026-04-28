@@ -9,7 +9,7 @@ import { useAuthStore } from "@/store/auth-store";
 export function AppShell({ children }) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [openGroups, setOpenGroups] = useState(["Karyawan"]);
+  const [openGroups, setOpenGroups] = useState(["Karyawan", "Inventori"]);
   const profile = useAuthStore((state) => state.profile);
   const logout = useAuthStore((state) => state.logout);
 

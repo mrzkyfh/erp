@@ -125,9 +125,7 @@ export function PayrollPage() {
               <TR>
                 <TH className="w-10"></TH>
                 <TH>Karyawan</TH>
-                <TH>Total Gaji Kotor</TH>
-                <TH>Potongan</TH>
-                <TH>Gaji Bersih</TH>
+                <TH>Total Gaji</TH>
                 <TH>Status</TH>
                 <TH>Aksi</TH>
               </TR>
@@ -144,8 +142,6 @@ export function PayrollPage() {
                       {expandedRow === item.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </TD>
                     <TD className="font-medium">{item.employee_name}</TD>
-                    <TD>{formatRupiah(item.total_allowances)}</TD>
-                    <TD>{formatRupiah(item.deductions)}</TD>
                     <TD className="font-bold text-primary">{formatRupiah(item.net_salary)}</TD>
                     <TD>
                       <Badge tone={item.is_paid ? "success" : "warning"}>
@@ -194,13 +190,6 @@ export function PayrollPage() {
                                 <span>{formatRupiah(item.total_allowances)}</span>
                               </div>
                             </div>
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold mb-2 uppercase tracking-wider text-muted-foreground">Potongan</p>
-                            <div className="flex justify-between text-sm">
-                              <span>Potongan Standar</span>
-                              <span className="text-destructive">-{formatRupiah(item.deductions)}</span>
-                            </div>
                             <div className="mt-6 p-4 rounded-2xl bg-primary/5 border border-primary/10">
                               <p className="text-xs text-primary font-bold uppercase mb-1">Gaji Bersih Diterima</p>
                               <p className="text-2xl font-bold text-primary">{formatRupiah(item.net_salary)}</p>
@@ -214,7 +203,7 @@ export function PayrollPage() {
               ))}
               {preview.length === 0 && (
                 <TR>
-                  <TD colSpan={7} className="text-center py-12 text-muted-foreground">
+                  <TD colSpan={5} className="text-center py-12 text-muted-foreground">
                     Belum ada data payroll untuk periode ini.
                   </TD>
                 </TR>

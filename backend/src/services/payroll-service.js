@@ -66,7 +66,7 @@ export async function processPayroll(month, year, processedBy) {
 
     const attendancesCount = attendanceLogs.length;
     
-    // 4. Calculate total hours worked
+    // 4. Calculate total hours worked (regular attendance)
     let totalHours = 0;
     attendanceLogs.forEach(log => {
       if (log.check_in_at && log.check_out_at) {
@@ -77,6 +77,20 @@ export async function processPayroll(month, year, processedBy) {
         totalHours += Math.max(0, diffHours);
       }
     });
+
+    // 4b. Calculate total overtime hours (approved only)
+    const { data: overtimeLogs, error: overtimeError } = await supabaseAdmin
+      .from("overtime_logs")
+      .select("total_hours")
+      .eq("employee_id", employee.id)
+      .eq("status", "approved")
+      .gte("date", range.start.split('T')[0])
+      .lte("date", range.end.split('T')[0]);
+
+    if (overtimeError) throw new AppError(overtimeError.message, 500);
+
+    const totalOvertimeHours = overtimeLogs.reduce((sum, log) => sum + Number(log.total_hours || 0), 0);
+    const roundedOvertimeHours = Math.round(totalOvertimeHours * 100) / 100;
 
     // 5. Get salary components FOR THIS SPECIFIC EMPLOYEE
     const { data: empComponents, error: empCompError } = await supabaseAdmin
@@ -93,15 +107,26 @@ export async function processPayroll(month, year, processedBy) {
 
     if (empCompError) throw new AppError(empCompError.message, 500);
 
-    // Fallback: If no custom config, use global salary types (optional, based on user preference)
-    const activeComponents = empComponents.length > 0 
-      ? empComponents.map(ec => ({
-          id: ec.salary_types.id,
-          name: ec.salary_types.name,
-          unit: ec.salary_types.unit,
-          amount: ec.amount
-        }))
-      : salaryTypes; // Using global defaults if not configured per employee
+    // Build active components list
+    let activeComponents = [];
+    
+    if (empComponents.length > 0) {
+      // Use custom configuration
+      activeComponents = empComponents.map(ec => ({
+        id: ec.salary_types.id,
+        name: ec.salary_types.name,
+        unit: ec.salary_types.unit,
+        amount: ec.amount
+      }));
+    } else {
+      // Fallback: Use global salary types as default
+      activeComponents = salaryTypes.map(st => ({
+        id: st.id,
+        name: st.name,
+        unit: st.unit,
+        amount: st.amount
+      }));
+    }
 
     const payrollItems = [];
     let totalAllowances = 0;
@@ -115,6 +140,10 @@ export async function processPayroll(month, year, processedBy) {
         totalAmount = Number(type.amount) * count;
       } else if (type.unit === 'per_jam') {
         count = Math.round(totalHours * 100) / 100;
+        totalAmount = Number(type.amount) * count;
+      } else if (type.unit === 'per_jam_lembur') {
+        // Komponen khusus lembur
+        count = roundedOvertimeHours;
         totalAmount = Number(type.amount) * count;
       } else {
         count = 1;
@@ -134,7 +163,8 @@ export async function processPayroll(month, year, processedBy) {
     }
 
 
-    const deductions = Number(employee.default_deduction || 0);
+    // 6. Calculate deductions (set to 0, no default deduction)
+    const deductions = 0;
     const netSalary = Math.round(totalAllowances - deductions);
 
     // 6. Upsert payroll detail

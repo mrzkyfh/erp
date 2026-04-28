@@ -24,7 +24,6 @@ const emptyForm = {
   join_date: "",
   base_salary: 0,
   allowance: 0,
-  default_deduction: 0,
   status: "aktif",
 };
 
@@ -88,7 +87,6 @@ export function EmployeesPage() {
         ...form,
         base_salary: Number(form.base_salary || 0),
         allowance: Number(form.allowance || 0),
-        default_deduction: Number(form.default_deduction || 0),
       };
 
       if (isEdit) {
@@ -159,14 +157,6 @@ export function EmployeesPage() {
                   <option value="aktif">Aktif</option>
                   <option value="nonaktif">Nonaktif</option>
                 </select>
-              </FormField>
-              <FormField label="Potongan bulanan default">
-                <Input
-                  type="number"
-                  min="0"
-                  value={form.default_deduction}
-                  onChange={(e) => updateForm("default_deduction", e.target.value)}
-                />
               </FormField>
 
               <div className="md:col-span-2">
@@ -247,7 +237,6 @@ export function EmployeesPage() {
                                 join_date: employee.join_date || "",
                                 base_salary: employee.base_salary || 0,
                                 allowance: employee.allowance || 0,
-                                default_deduction: employee.default_deduction || 0,
                                 status: employee.status || "aktif",
                               })
                             }

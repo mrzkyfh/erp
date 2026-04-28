@@ -25,7 +25,6 @@ const employeeSchema = z.object({
   salary_type: z.enum(["harian", "bulanan"]).optional(),
   base_salary: z.number().nonnegative().optional(),
   allowance: z.number().nonnegative().optional(),
-  default_deduction: z.number().nonnegative().optional(),
   status: z.enum(["aktif", "nonaktif"]),
 });
 

@@ -72,7 +72,6 @@ export async function createEmployee(payload) {
       salary_type: payload.salary_type || "bulanan",
       base_salary: payload.base_salary || 0,
       allowance: payload.allowance || 0,
-      default_deduction: payload.default_deduction || 0,
       join_date: payload.join_date,
       status: payload.status,
 
@@ -139,7 +138,6 @@ export async function updateEmployee(employeeId, payload) {
   if (payload.salary_type) employeeUpdate.salary_type = payload.salary_type;
   if (payload.base_salary !== undefined) employeeUpdate.base_salary = payload.base_salary;
   if (payload.allowance !== undefined) employeeUpdate.allowance = payload.allowance;
-  if (payload.default_deduction !== undefined) employeeUpdate.default_deduction = payload.default_deduction;
   if (payload.join_date) employeeUpdate.join_date = payload.join_date;
   if (payload.status) employeeUpdate.status = payload.status;
 
