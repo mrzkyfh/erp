@@ -207,23 +207,23 @@ export async function getLatestItemPrice(itemId) {
 }
 
 export async function deleteInventoryItem(itemId) {
-  // Check if item has any transactions
-  const { data: purchases } = await supabaseAdmin
-    .from("stock_purchase_items")
-    .select("id")
-    .eq("item_id", itemId)
-    .limit(1);
-    
-  const { data: usages } = await supabaseAdmin
+  // Delete related stock usages first (cascade)
+  const { error: usageError } = await supabaseAdmin
     .from("stock_usages")
-    .select("id")
-    .eq("item_id", itemId)
-    .limit(1);
+    .delete()
+    .eq("item_id", itemId);
     
-  if ((purchases && purchases.length > 0) || (usages && usages.length > 0)) {
-    throw new AppError("Item tidak dapat dihapus karena sudah memiliki riwayat transaksi.", 422);
-  }
+  if (usageError) throw new AppError(usageError.message, 500);
   
+  // Delete related stock purchase items (cascade)
+  const { error: purchaseError } = await supabaseAdmin
+    .from("stock_purchase_items")
+    .delete()
+    .eq("item_id", itemId);
+    
+  if (purchaseError) throw new AppError(purchaseError.message, 500);
+  
+  // Now delete the item itself
   const { error } = await supabaseAdmin
     .from("inventory_items")
     .delete()

@@ -53,7 +53,7 @@ export function PayrollPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Proses Payroll</CardTitle>
+          <CardTitle>Gaji Karyawan</CardTitle>
           <CardDescription>Pilih periode untuk menghitung atau melihat riwayat gaji.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-[180px,180px,1fr]">
@@ -107,7 +107,7 @@ export function PayrollPage() {
                   }
                 }}
               >
-                {busy ? "Menghitung..." : "Hitung Payroll Periode Ini"}
+                {busy ? "Menghitung..." : "Hitung Gaji Periode Ini"}
               </Button>
             </div>
           ) : null}
