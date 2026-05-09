@@ -4,11 +4,11 @@ import { authRoutes } from "./auth-routes.js";
 import { customerRoutes } from "./customer-routes.js";
 import { dashboardRoutes } from "./dashboard-routes.js";
 import { employeeRoutes } from "./employee-routes.js";
-import overtimeRoutes from "./overtime-routes.js";
 import { inventoryRoutes } from "./inventory-routes.js";
 import { payrollRoutes } from "./payroll-routes.js";
 import { salaryTypeRoutes } from "./salary-type-routes.js";
 import { businessSettingsRoutes } from "./business-settings-routes.js";
+import overtimeRoutes from "./overtime-routes.js";
 import { authenticate, requireRoles } from "../middleware/auth-middleware.js";
 import { supabaseAdmin } from "../services/supabase.js";
 

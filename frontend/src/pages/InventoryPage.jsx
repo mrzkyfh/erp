@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Search, Plus, Calendar } from "lucide-react";
+import { Search, Plus, Calendar, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -24,6 +24,7 @@ export function InventoryPage() {
     usages: [],
   });
   const [searchQuery, setSearchQuery] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
   
   // State untuk filter tanggal riwayat transaksi
   const [selectedDate, setSelectedDate] = useState(() => {
@@ -43,6 +44,23 @@ export function InventoryPage() {
       setOverview(response.data);
     } catch (error) {
       toast.error(error.message);
+    }
+  };
+
+  const handleDeleteItem = async (itemId, itemName) => {
+    if (!confirm(`Yakin hapus item "${itemName}"? Transaksi terkait juga akan dihapus.`)) {
+      return;
+    }
+
+    setDeletingId(itemId);
+    try {
+      await api.delete(`/inventory/items/${itemId}`);
+      toast.success("Item berhasil dihapus.");
+      await loadData();
+    } catch (error) {
+      toast.error(error.message);
+    } finally {
+      setDeletingId(null);
     }
   };
   
@@ -162,6 +180,7 @@ export function InventoryPage() {
                 <TH>Item</TH>
                 <TH>Stok</TH>
                 <TH>Status</TH>
+                <TH>Aksi</TH>
               </TR>
             </THead>
             <TBody>
@@ -177,11 +196,21 @@ export function InventoryPage() {
                         {Number(item.current_stock) <= Number(item.min_stock) ? "Perlu restock" : "Aman"}
                       </Badge>
                     </TD>
+                    <TD>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        disabled={deletingId === item.id}
+                        onClick={() => handleDeleteItem(item.id, item.name)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TD>
                   </TR>
                 ))
               ) : (
                 <TR>
-                  <TD colSpan="3" className="text-center text-muted-foreground">
+                  <TD colSpan="4" className="text-center text-muted-foreground">
                     {searchQuery ? "Tidak ada item yang cocok" : "Tidak ada item"}
                   </TD>
                 </TR>
